@@ -193,3 +193,34 @@ class ModulesListView(APIView):
                 ).data,
             })
         return Response({"success": True, "data": data})
+
+
+class AssignerRoleView(APIView):
+    """POST /auth/users/<id>/assigner-role — assigne un rôle et recalcule les permissions."""
+    permission_classes = [permissions.IsAuthenticated, CanGererPersonnel]
+
+    def post(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"success": False, "erreur": "Utilisateur introuvable."}, status=404)
+
+        role = request.data.get("role")
+        if not role or role not in [r[0] for r in User.ROLES]:
+            return Response({"success": False, "erreur": "Rôle invalide."}, status=400)
+
+        from .role_permissions import assigner_role
+        user.role = role
+        user.save(update_fields=["role"])
+        assigner_role(user, role)
+
+        AuditLog.log(
+            request.user, "modification_permissions",
+            details={"cible_id": str(user.id), "role": role},
+            request=request,
+        )
+        return Response({
+            "success": True,
+            "message": f"Rôle {user.get_role_display()} assigné à {user.nom_complet}.",
+            "data": UserListSerializer(user).data,
+        })

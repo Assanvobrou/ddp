@@ -31,3 +31,54 @@
   to   { opacity: 1; }
 }
 .animate-fade-in { animation: fadeIn 0.25s ease both; }
+
+/* ── IMPRESSION TICKETS ──────────────────────────────────────────────────────
+   Format A5 horizontal, 2 souches côte à côte.
+   La coupure est matérialisée par un trait pointillé central.
+   Les boutons sont masqués à l'impression.
+───────────────────────────────────────────────────────────────────────────── */
+@media print {
+  /* Masquer tout sauf la zone d'impression */
+  body > * { display: none !important; }
+  #print-ticket { display: flex !important; }
+
+  /* Format A5 paysage pour 2 souches */
+  @page {
+    size: A5 landscape;
+    margin: 8mm;
+  }
+
+  /* Conteneur des 2 souches */
+  #print-ticket {
+    display: flex !important;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    gap: 0;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Chaque souche occupe la moitié */
+  #print-ticket .souche {
+    flex: 1;
+    padding: 8mm;
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* Trait de coupe central */
+  #print-ticket .coupe {
+    width: 1px;
+    background: repeating-linear-gradient(
+      to bottom,
+      #999 0px, #999 4px,
+      transparent 4px, transparent 8px
+    );
+    flex-shrink: 0;
+    margin: 4mm 0;
+  }
+
+  /* Masquer les boutons et éléments non imprimables */
+  button, .no-print, [data-no-print] { display: none !important; }
+}

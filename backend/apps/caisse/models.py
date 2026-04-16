@@ -31,7 +31,8 @@ class SessionCaisse(models.Model):
         related_name="sessions_ouvertes", verbose_name="Ouverte par"
     )
     ouverte_le = models.DateTimeField(default=timezone.now, verbose_name="Date d'ouverture")
-    date_session = models.DateField(default=timezone.localdate, unique=True, verbose_name="Date")
+    date_session = models.DateField(default=timezone.localdate, verbose_name="Date")
+    heure_fin_prevue = models.DateTimeField(null=True, blank=True, verbose_name="Heure de fin prévue")
 
     # Fermeture — étape 1 (caissière)
     fermee_le = models.DateTimeField(null=True, blank=True, verbose_name="Date de fermeture")
@@ -75,6 +76,7 @@ class SessionCaisse(models.Model):
     class Meta:
         db_table = "ddp_sessions_caisse"
         ordering = ["-date_session"]
+        unique_together = [("ouverte_par", "date_session")]
         verbose_name = "Session de caisse"
         verbose_name_plural = "Sessions de caisse"
 
@@ -82,9 +84,14 @@ class SessionCaisse(models.Model):
         return f"Session {self.date_session} — {self.get_statut_display()}"
 
     def calculer_montant_systeme(self):
-        """Recalcule le montant total depuis les fiches de paiement."""
+        """
+        Recalcule le montant total de cette session.
+        Ne compte que les fiches PAYÉES liées à cette session (session=self).
+        Chaque caissier a sa propre session → chaque bilan est indépendant.
+        """
         from django.db.models import Sum
-        total = self.fiches_paiement.filter(
+        total = FichePaiement.objects.filter(
+            session=self,
             statut__in=[FichePaiement.PAYE, FichePaiement.ASSURANCE]
         ).aggregate(total=Sum("montant_patient"))["total"] or 0
         self.montant_systeme = total
@@ -152,6 +159,7 @@ class Patient(models.Model):
     )
     session = models.ForeignKey(
         SessionCaisse, on_delete=models.PROTECT,
+        null=True, blank=True,
         related_name="patients", verbose_name="Session de caisse"
     )
     date_enregistrement = models.DateTimeField(
@@ -212,7 +220,8 @@ class FichePaiement(models.Model):
     )
     session = models.ForeignKey(
         SessionCaisse, on_delete=models.PROTECT,
-        related_name="fiches_paiement", verbose_name="Session"
+        null=True, blank=True,
+        related_name="fiches_paiement", verbose_name="Session de validation"
     )
 
     # Montants (calculés à l'enregistrement, figés ensuite)

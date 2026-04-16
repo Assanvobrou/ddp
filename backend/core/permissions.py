@@ -1,10 +1,12 @@
+"""
+Permissions DDP — nomenclature définitive : module.action_objet
+Chaque permission est nommée pour être compréhensible dans 6 mois.
+"""
 from rest_framework.permissions import BasePermission
 
 
 class HasModule(BasePermission):
-    """Vérifie que l'utilisateur a accès au module spécifié."""
     module_code = None
-
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -14,9 +16,7 @@ class HasModule(BasePermission):
 
 
 class HasPermissionCode(BasePermission):
-    """Vérifie qu'un utilisateur possède une permission granulaire."""
     permission_code = None
-
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
@@ -26,36 +26,35 @@ class HasPermissionCode(BasePermission):
 
 
 def module_permission(module_code):
-    """Factory — crée une classe de permission pour un module donné."""
-    return type(
-        f"HasModule_{module_code}",
-        (HasModule,),
-        {"module_code": module_code},
-    )
-
+    return type(f"HasModule_{module_code}", (HasModule,), {"module_code": module_code})
 
 def granular_permission(perm_code):
-    """Factory — crée une classe de permission granulaire."""
-    return type(
-        f"HasPerm_{perm_code}",
-        (HasPermissionCode,),
-        {"permission_code": perm_code},
-    )
+    return type(f"HasPerm_{perm_code.replace('.','_')}", (HasPermissionCode,), {"permission_code": perm_code})
 
 
-# Permissions prédéfinies — Caisse
-CanEnregistrerPatient = granular_permission("caisse.enregistrer_patient")
-CanEditerFichePaiement = granular_permission("caisse.editer_fiche_paiement")
-CanVoirDashboardRecettes = granular_permission("caisse.voir_dashboard_recettes")
-CanExporterRapport = granular_permission("caisse.exporter_rapport")
-CanGererCaisse = granular_permission("caisse.gerer_session_caisse")
+# ── BUREAU DES ENTRÉES ────────────────────────────────────────────────────────
+CanEnregistrerPatient   = granular_permission("bureau.enregistrer_patient")
+CanCreerFichePaiement   = granular_permission("bureau.creer_fiche_paiement")
 
-# Permissions prédéfinies — Configuration
-CanGererPrestations = granular_permission("config.gerer_prestations")
-CanGererPersonnel = granular_permission("config.gerer_personnel")
-CanGererAssurances = granular_permission("config.gerer_assurances")
-CanGererParametres = granular_permission("config.gerer_parametres")
+# ── CAISSE ────────────────────────────────────────────────────────────────────
+CanOuvrirFermerSession  = granular_permission("caisse.ouvrir_fermer_session")
+CanValiderPaiement      = granular_permission("caisse.valider_paiement")
+CanVoirRapports         = granular_permission("caisse.voir_rapports")
+CanValiderVersement     = granular_permission("caisse.valider_versement")
 
-# Accès modules
-HasCaisseModule = module_permission("caisse")
-HasConfigModule = module_permission("configuration")
+# ── CONFIGURATION ─────────────────────────────────────────────────────────────
+CanGererPrestations     = granular_permission("config.gerer_prestations")
+CanGererAssurances      = granular_permission("config.gerer_assurances")
+CanGererPersonnel       = granular_permission("config.gerer_personnel")
+CanGererParametres      = granular_permission("config.gerer_parametres")
+
+# ── ACCÈS MODULES ─────────────────────────────────────────────────────────────
+HasBureauModule         = module_permission("bureau_entrees")
+HasCaisseModule         = module_permission("caisse")
+HasConfigModule         = module_permission("configuration")
+
+# ── ALIASES rétrocompatibilité ─────────────────────────────────────────────────
+CanGererCaisse           = CanOuvrirFermerSession
+CanVoirDashboardRecettes = CanVoirRapports
+CanEditerFichePaiement   = CanValiderPaiement
+CanExporterRapport       = CanVoirRapports

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react'
 import { caisseAPI } from '@/services/api'
 import { useAuth } from './AuthContext'
 import type { SessionCaisse } from '@/types'
@@ -13,35 +13,44 @@ interface CaisseContextValue {
 const CaisseContext = createContext<CaisseContextValue | null>(null)
 
 export function CaisseProvider({ children }: { children: ReactNode }) {
-  const { hasModule } = useAuth()
+  const { user } = useAuth()
   const [session, setSession] = useState<SessionCaisse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Utilise une ref stable pour éviter les boucles infinies
+  const userRef = useRef(user)
+  useEffect(() => { userRef.current = user }, [user])
+
   const refresh = useCallback(async () => {
-    if (!hasModule('caisse')) return
+    const currentUser = userRef.current
+    // Vérifie directement sur l'objet user sans passer par hasModule
+    if (!currentUser) return
+    const hasCaisse = currentUser.role === 'super_admin' ||
+      currentUser.modules.some(m => m.code === 'caisse')
+    if (!hasCaisse) return
+
     setIsLoading(true)
     try {
       const { data } = await caisseAPI.statut()
       setSession(data.ouverte ? data.session : null)
     } catch {
+      // Silencieux — ne pas déconnecter si le statut caisse échoue
       setSession(null)
     } finally {
       setIsLoading(false)
     }
-  }, [hasModule])
+  }, []) // dépendances vides — stable pour toujours
 
-  // Charge le statut caisse au montage si l'utilisateur a le module
   useEffect(() => {
+    // Lance refresh seulement quand l'utilisateur est chargé
+    if (!user) return
     refresh()
-    // Rafraîchit toutes les 2 minutes
     const interval = setInterval(refresh, 120_000)
     return () => clearInterval(interval)
-  }, [refresh])
+  }, [user?.id]) // dépend uniquement de l'ID — stable
 
   return (
-    <CaisseContext.Provider
-      value={{ session, isOuverte: !!session, isLoading, refresh }}
-    >
+    <CaisseContext.Provider value={{ session, isOuverte: !!session, isLoading, refresh }}>
       {children}
     </CaisseContext.Provider>
   )

@@ -8,6 +8,7 @@ from .views import (
     UserListCreateView,
     UserDetailView,
     ModulesListView,
+    AssignerRoleView,
 )
 
 urlpatterns = [
@@ -20,5 +21,6 @@ urlpatterns = [
     # Gestion du personnel
     path("users/", UserListCreateView.as_view(), name="user-list-create"),
     path("users/<uuid:pk>/", UserDetailView.as_view(), name="user-detail"),
+    path("users/<uuid:pk>/assigner-role/", AssignerRoleView.as_view(), name="user-assigner-role"),
     path("modules/", ModulesListView.as_view(), name="modules-list"),
 ]

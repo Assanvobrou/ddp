@@ -29,11 +29,12 @@ logger = logging.getLogger("apps.caisse")
 # ── SESSION CAISSE ─────────────────────────────────────────────────────────────
 
 class StatutCaisseView(APIView):
-    """GET /caisse/statut — état de la session courante."""
+    """GET /caisse/statut — état de la session de l'utilisateur connecté."""
     permission_classes = [permissions.IsAuthenticated, HasCaisseModule]
 
     def get(self, request):
         session = SessionCaisse.objects.filter(
+            ouverte_par=request.user,
             statut=SessionCaisse.OUVERTE
         ).select_related("ouverte_par").first()
         if session:
@@ -47,18 +48,26 @@ class StatutCaisseView(APIView):
 
 class OuvrirCaisseView(APIView):
     """POST /caisse/ouvrir — ouvre une nouvelle session."""
-    permission_classes = [permissions.IsAuthenticated, HasCaisseModule, CanGererCaisse]
+    permission_classes = [permissions.IsAuthenticated, HasCaisseModule]
 
     def post(self, request):
-        # Vérifier qu'aucune session n'est déjà ouverte aujourd'hui
+        import datetime
         today = timezone.localdate()
-        if SessionCaisse.objects.filter(date_session=today).exists():
+        # Chaque caissier a sa propre session
+        if SessionCaisse.objects.filter(ouverte_par=request.user, date_session=today).exists():
             return Response(
-                {"success": False, "erreur": "Une session existe déjà pour aujourd'hui."},
+                {"success": False, "erreur": "Vous avez déjà une session ouverte aujourd'hui."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        session = SessionCaisse.objects.create(ouverte_par=request.user)
+        heure_fin_prevue = request.data.get("heure_fin_prevue")
+        if not heure_fin_prevue:
+            heure_fin_prevue = timezone.now() + datetime.timedelta(hours=8)
+
+        session = SessionCaisse.objects.create(
+            ouverte_par=request.user,
+            heure_fin_prevue=heure_fin_prevue,
+        )
         AuditLog.log(request.user, "ouverture_caisse",
                      details={"session_id": str(session.id), "date": str(today)},
                      request=request)
@@ -70,11 +79,16 @@ class OuvrirCaisseView(APIView):
 
 
 class RecapitulatifFermetureView(APIView):
-    """GET /caisse/recapitulatif — récap avant fermeture (protège la caissière)."""
-    permission_classes = [permissions.IsAuthenticated, HasCaisseModule, CanGererCaisse]
+    """
+    GET /caisse/recapitulatif — bilan de la session du caissier connecté.
+    Retourne uniquement les données de SA session (ouverte_par=request.user).
+    Chaque caissier voit son propre bilan, indépendamment des autres.
+    """
+    permission_classes = [permissions.IsAuthenticated, HasCaisseModule]
 
     def get(self, request):
         session = SessionCaisse.objects.filter(
+            ouverte_par=request.user,
             statut=SessionCaisse.OUVERTE
         ).prefetch_related(
             "fiches_paiement__patient",
@@ -93,11 +107,15 @@ class RecapitulatifFermetureView(APIView):
 
 
 class FermerCaisseView(APIView):
-    """POST /caisse/fermer — ferme la session (étape 1)."""
-    permission_classes = [permissions.IsAuthenticated, HasCaisseModule, CanGererCaisse]
+    """POST /caisse/fermer — ferme la session du caissier connecté (étape 1).
+    Accessible à tout utilisateur ayant le module caisse.
+    Filtre par ouverte_par=request.user — ne peut fermer que SA propre session.
+    """
+    permission_classes = [permissions.IsAuthenticated, HasCaisseModule]
 
     def post(self, request):
         session = SessionCaisse.objects.filter(
+            ouverte_par=request.user,
             statut=SessionCaisse.OUVERTE
         ).first()
 
@@ -237,14 +255,14 @@ class PatientListCreateView(generics.ListCreateAPIView):
         ).order_by("-date_enregistrement")
 
     def perform_create(self, serializer):
-        session = SessionCaisse.objects.filter(statut=SessionCaisse.OUVERTE).first()
-        if not session:
-            from rest_framework.exceptions import ValidationError
-            raise ValidationError("Caisse fermée. Impossible d'enregistrer un patient.")
-
+        """
+        Enregistre le patient depuis le bureau des entrées.
+        La session est None — le patient n'est pas lié à une session caisse.
+        Il peut être enregistré même si la caisse est fermée.
+        """
         patient = serializer.save(
             enregistre_par=self.request.user,
-            session=session,
+            session=None,
         )
         AuditLog.log(
             self.request.user, "enregistrement_patient",

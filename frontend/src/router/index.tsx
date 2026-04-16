@@ -5,8 +5,10 @@ import Landing from '@/pages/Landing'
 import ModuleSelector from '@/pages/ModuleSelector'
 import ChangePassword from '@/pages/ChangePassword'
 import { PatientsList, NouveauPatient, PatientDetail } from '@/pages/bureau'
+import BureauFiches from '@/pages/bureau/BureauFiches'
 import {
-  GestionCaisse, FichesPaiement, DashboardRecettes
+  PaiementsEnAttente, PaiementsValides,
+  ClotureCaisse, Versements, Rapports
 } from '@/pages/caisse'
 import {
   Prestations, Assurances, Personnel, ParametresClinique
@@ -33,17 +35,24 @@ export default function AppRouter() {
         <Route path="/modules" element={<ProtectedRoute><ModuleSelector /></ProtectedRoute>} />
         <Route path="/changer-mot-de-passe" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
-        {/* Module Bureau des entrées */}
-        <Route path="/bureau" element={<ProtectedRoute permission="bureau.enregistrer_patient"><PatientsList /></ProtectedRoute>} />
-        <Route path="/bureau/nouveau" element={<ProtectedRoute permission="bureau.enregistrer_patient"><NouveauPatient /></ProtectedRoute>} />
-        <Route path="/bureau/patients/:id" element={<ProtectedRoute permission="bureau.enregistrer_patient"><PatientDetail /></ProtectedRoute>} />
+        {/* Bureau des entrées */}
+        <Route path="/bureau" element={<ProtectedRoute><PatientsList /></ProtectedRoute>} />
+        <Route path="/bureau/nouveau" element={<ProtectedRoute><NouveauPatient /></ProtectedRoute>} />
+        <Route path="/bureau/patients/:id" element={<ProtectedRoute><PatientDetail /></ProtectedRoute>} />
+        <Route path="/bureau/fiches" element={<ProtectedRoute><BureauFiches /></ProtectedRoute>} />
 
-        {/* Module Caisse */}
-        <Route path="/caisse" element={<ProtectedRoute><GestionCaisse /></ProtectedRoute>} />
-        <Route path="/caisse/fiches" element={<ProtectedRoute><FichesPaiement /></ProtectedRoute>} />
-        <Route path="/caisse/dashboard" element={<ProtectedRoute permission="caisse.voir_dashboard_recettes"><DashboardRecettes /></ProtectedRoute>} />
+        {/* Caisse — commun */}
+        <Route path="/caisse/paiements" element={<ProtectedRoute><PaiementsEnAttente /></ProtectedRoute>} />
+        <Route path="/caisse/paiements-valides" element={<ProtectedRoute><PaiementsValides /></ProtectedRoute>} />
 
-        {/* Module Configuration */}
+        {/* Caisse — Caissière uniquement */}
+        <Route path="/caisse/cloture" element={<ProtectedRoute><ClotureCaisse /></ProtectedRoute>} />
+
+        {/* Caisse — Responsable uniquement */}
+        <Route path="/caisse/versements" element={<ProtectedRoute permission="caisse.voir_dashboard_recettes"><Versements /></ProtectedRoute>} />
+        <Route path="/caisse/rapports" element={<ProtectedRoute permission="caisse.voir_dashboard_recettes"><Rapports /></ProtectedRoute>} />
+
+        {/* Configuration */}
         <Route path="/configuration/prestations" element={<ProtectedRoute><Prestations /></ProtectedRoute>} />
         <Route path="/configuration/assurances" element={<ProtectedRoute><Assurances /></ProtectedRoute>} />
         <Route path="/configuration/personnel" element={<ProtectedRoute><Personnel /></ProtectedRoute>} />

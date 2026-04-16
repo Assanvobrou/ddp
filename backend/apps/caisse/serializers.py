@@ -18,7 +18,7 @@ class SessionCaisseSerializer(serializers.ModelSerializer):
         model = SessionCaisse
         fields = [
             "id", "date_session", "statut", "statut_display",
-            "ouverte_par", "ouverte_par_nom", "ouverte_le",
+            "ouverte_par", "ouverte_par_nom", "ouverte_le", "heure_fin_prevue",
             "fermee_le", "montant_systeme", "montant_compte",
             "ecart", "justificatif_caissiere",
             "valide_par", "valide_par_nom", "valide_le",
@@ -63,48 +63,55 @@ class ValidationVersementSerializer(serializers.Serializer):
 
 
 class RecapitulatifFermetureSerializer(serializers.ModelSerializer):
-    """Récapitulatif détaillé pour la caissière à la fermeture."""
-    fiches = serializers.SerializerMethodField()
-    totaux_par_prestation = serializers.SerializerMethodField()
-    totaux_par_statut = serializers.SerializerMethodField()
+    """
+    Récapitulatif de la session du caissier connecté.
+    Toutes les données sont filtrées par session=obj (FK sur FichePaiement).
+    Chaque caissier voit uniquement ses propres chiffres.
+    """
     ouverte_par_nom = serializers.CharField(source="ouverte_par.nom_complet", read_only=True)
+    nb_fiches = serializers.SerializerMethodField()
+    nb_patients = serializers.SerializerMethodField()
+    totaux_par_prestation = serializers.SerializerMethodField()
 
     class Meta:
         model = SessionCaisse
         fields = [
-            "id", "date_session", "ouverte_le", "ouverte_par_nom",
-            "montant_systeme", "fiches",
-            "totaux_par_prestation", "totaux_par_statut",
+            "id", "date_session", "ouverte_le", "heure_fin_prevue",
+            "ouverte_par_nom", "montant_systeme",
+            "nb_fiches", "nb_patients",
+            "totaux_par_prestation",
         ]
 
-    def get_fiches(self, obj):
-        return FichePaiementListSerializer(
-            obj.fiches_paiement.select_related("patient", "prestation"),
-            many=True
-        ).data
+    def get_nb_fiches(self, obj):
+        """Nombre de fiches payées dans cette session."""
+        return FichePaiement.objects.filter(
+            session=obj,
+            statut__in=[FichePaiement.PAYE, FichePaiement.ASSURANCE]
+        ).count()
+
+    def get_nb_patients(self, obj):
+        """Nombre de patients distincts dans cette session."""
+        return FichePaiement.objects.filter(
+            session=obj,
+            statut__in=[FichePaiement.PAYE, FichePaiement.ASSURANCE]
+        ).values("patient").distinct().count()
 
     def get_totaux_par_prestation(self, obj):
+        """Détail par prestation — uniquement pour cette session."""
         from django.db.models import Sum, Count
         return list(
-            obj.fiches_paiement.values(
+            FichePaiement.objects.filter(
+                session=obj,
+                statut__in=[FichePaiement.PAYE, FichePaiement.ASSURANCE]
+            ).values(
                 nom=models.F("prestation__nom"),
-                emoji=models.F("prestation__emoji"),
             ).annotate(
                 nb=Count("id"),
                 total=Sum("montant_total"),
                 total_patient=Sum("montant_patient"),
                 total_assurance=Sum("montant_assurance"),
-            )
+            ).order_by("-total")
         )
-
-    def get_totaux_par_statut(self, obj):
-        from django.db.models import Sum, Count
-        return {
-            statut: obj.fiches_paiement.filter(statut=statut).aggregate(
-                nb=Count("id"), total=Sum("montant_patient")
-            )
-            for statut, _ in FichePaiement.STATUTS
-        }
 
 
 # Import nécessaire pour RecapitulatifFermetureSerializer
@@ -172,6 +179,11 @@ class FichePaiementCreateSerializer(serializers.ModelSerializer):
         fields = ["patient", "prestation", "service", "quantite", "statut", "notes"]
 
     def create(self, validated_data):
+        """
+        Crée une fiche depuis le bureau des entrées.
+        Session = None à la création — elle sera assignée quand
+        le caissier valide le paiement (statut → paye).
+        """
         prestation = validated_data["prestation"]
         patient = validated_data["patient"]
 
@@ -179,11 +191,9 @@ class FichePaiementCreateSerializer(serializers.ModelSerializer):
         if patient.a_assurance and prestation.prise_en_charge_assurance:
             taux_assurance = prestation.taux_assurance
 
-        session = SessionCaisse.objects.filter(statut=SessionCaisse.OUVERTE).first()
-
         fiche = FichePaiement(
             **validated_data,
-            session=session,
+            session=None,               # assignée lors de la validation caisse
             prix_unitaire=prestation.prix,
             taux_assurance=taux_assurance,
             creee_par=self.context["request"].user,
@@ -198,12 +208,50 @@ class FichePaiementUpdateSerializer(serializers.ModelSerializer):
         fields = ["statut", "notes", "quantite"]
 
     def validate(self, attrs):
-        # Impossible de modifier si session fermée
-        if self.instance and self.instance.session.statut != SessionCaisse.OUVERTE:
-            raise serializers.ValidationError(
-                "Impossible de modifier une fiche après fermeture de caisse."
-            )
+        """
+        Vérifie que le caissier a une session ouverte avant de valider.
+        La session du caissier connecté sera assignée à la fiche lors de la validation.
+        """
+        if attrs.get("statut") == FichePaiement.PAYE:
+            request = self.context.get("request")
+            if request:
+                session = SessionCaisse.objects.filter(
+                    ouverte_par=request.user,
+                    statut=SessionCaisse.OUVERTE
+                ).first()
+                if not session:
+                    raise serializers.ValidationError(
+                        "Votre caisse est fermée. Ouvrez votre caisse avant de valider un paiement."
+                    )
         return attrs
+
+    def update(self, instance, validated_data):
+        """
+        Lors de la validation (statut → paye) :
+        - Assigne la session du caissier connecté à la fiche
+        - Met à jour le montant système de cette session
+        """
+        request = self.context.get("request")
+
+        if validated_data.get("statut") == FichePaiement.PAYE and request:
+            # Récupérer la session ouverte du caissier connecté
+            session = SessionCaisse.objects.filter(
+                ouverte_par=request.user,
+                statut=SessionCaisse.OUVERTE
+            ).first()
+            if session:
+                instance.session = session
+
+        # Appliquer les modifications
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Recalculer le montant de la session après validation
+        if instance.session:
+            instance.session.calculer_montant_systeme()
+
+        return instance
 
 
 class DashboardRecettesSerializer(serializers.Serializer):

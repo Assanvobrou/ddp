@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import {
-  Banknote, Settings, LogOut,
-  ChevronRight, Stethoscope, Shield, DoorOpen
+  Banknote, Settings, LogOut, DoorOpen,
+  ChevronRight, Stethoscope, Shield
 } from 'lucide-react'
 
 const MODULE_ICONS: Record<string, React.ReactNode> = {
@@ -19,7 +19,7 @@ const MODULE_DESCRIPTIONS: Record<string, string> = {
 
 const MODULE_ENTRY: Record<string, string> = {
   bureau_entrees: '/bureau',
-  caisse:         '/caisse',
+  caisse:         '/caisse/paiements',
   configuration:  '/configuration/prestations',
 }
 
@@ -74,8 +74,11 @@ export default function ModuleSelector() {
 
           {/* Titre */}
           <div className="text-center mb-10">
+            <div className="w-14 h-14 rounded-2xl bg-primary-50 border border-primary-100 flex items-center justify-center mx-auto mb-4">
+              <Stethoscope size={28} strokeWidth={1.5} className="text-primary-600" />
+            </div>
             <h1 className="text-2xl font-black text-ink tracking-tight mb-2">
-              Bonjour, {user.prenom} 👋
+              Bonjour, {user.prenom}
             </h1>
             <p className="text-sm text-ink-faint">
               Sélectionnez un module pour commencer votre session.
@@ -98,7 +101,7 @@ export default function ModuleSelector() {
             </div>
           ) : (
             <div className={`grid gap-4 ${user.modules.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
-              {user.modules.map((module, i) => (
+              {[...user.modules].sort((a, b) => a.ordre - b.ordre).map((module, i) => (
                 <button
                   key={module.code}
                   onClick={() => navigate(MODULE_ENTRY[module.code] || `/${module.code}`)}

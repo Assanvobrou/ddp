@@ -264,7 +264,7 @@ export function PatientDetail() {
           patient={patient}
           onSuccess={() => {
             setRedirecting(true)
-            setTimeout(() => navigate('/caisse/fiches'), 1800)
+            setTimeout(() => navigate('/caisse/paiements'), 1800)
           }}
         />
       </div>

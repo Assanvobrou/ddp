@@ -104,6 +104,7 @@ export const authAPI = {
     get: (id: string) => api.get(`/auth/users/${id}/`),
     update: (id: string, data: unknown) => api.patch(`/auth/users/${id}/`, data),
     deactivate: (id: string) => api.delete(`/auth/users/${id}/`),
+    assignerRole: (id: string, role: string) => api.post(`/auth/users/${id}/assigner-role/`, { role }),
   },
   modules: () => api.get('/auth/modules/'),
 }
@@ -111,7 +112,7 @@ export const authAPI = {
 // ── Endpoints Caisse ──────────────────────────────────────────────────────────
 export const caisseAPI = {
   statut: () => api.get('/caisse/statut/'),
-  ouvrir: () => api.post('/caisse/ouvrir/'),
+  ouvrir: (data?: { heure_fin_prevue?: string }) => api.post('/caisse/ouvrir/', data || {}),
   recapitulatif: () => api.get('/caisse/recapitulatif/'),
   fermer: (data: { montant_compte: number; justificatif?: string }) =>
     api.post('/caisse/fermer/', data),

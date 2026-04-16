@@ -1,4 +1,5 @@
 import re
+import unicodedata
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import get_user_model
@@ -21,9 +22,21 @@ class PermissionGranulaireSerializer(serializers.ModelSerializer):
 
 
 class DDPTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """JWT enrichi avec les infos utilisateur et ses modules."""
+    """
+    JWT enrichi avec les infos utilisateur et ses modules.
+    Accepte l'email OU le matricule comme identifiant (ex: b.assanvo).
+    """
 
     def validate(self, attrs):
+        # Résoudre le matricule vers l'email si nécessaire
+        username = attrs.get(self.username_field, "")
+        if username and "@" not in username:
+            # C'est un matricule — chercher l'utilisateur correspondant
+            try:
+                user_obj = User.objects.get(matricule=username.lower())
+                attrs[self.username_field] = user_obj.email
+            except User.DoesNotExist:
+                pass
         data = super().validate(attrs)
         user = self.user
 
@@ -117,26 +130,45 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate_mot_de_passe(self, value):
-        validate_password(value)
+        """
+        Mot de passe agent : PIN de 4 chiffres minimum (ex: 1234).
+        Pour le super admin, utiliser un mot de passe fort en ligne de commande.
+        """
+        if not value.isdigit():
+            raise serializers.ValidationError("Le mot de passe doit contenir uniquement des chiffres.")
+        if len(value) < 4:
+            raise serializers.ValidationError("Le mot de passe doit contenir au moins 4 chiffres.")
         return value
 
     def create(self, validated_data):
         modules_ids = validated_data.pop("modules_ids", [])
-        permissions_codes = validated_data.pop("permissions_codes", [])
+        validated_data.pop("permissions_codes", [])  # ignoré — calculé depuis le rôle
         mot_de_passe = validated_data.pop("mot_de_passe")
+
+        # Auto-générer le matricule si non fourni : prenom[0].nom (ex: b.assanvo)
+        if not validated_data.get("matricule"):
+            prenom = validated_data.get("prenom", "")
+            nom = validated_data.get("nom", "")
+            def slug(s):
+                nfkd = unicodedata.normalize("NFKD", s)
+                return re.sub(r"[^a-z0-9]", "", nfkd.encode("ascii","ignore").decode().lower())
+            base = f"{slug(prenom)[:1]}.{slug(nom)}"
+            # Garantir l'unicité
+            matricule = base
+            counter = 2
+            while User.objects.filter(matricule=matricule).exists():
+                matricule = f"{base}{counter}"
+                counter += 1
+            validated_data["matricule"] = matricule
 
         user = User(**validated_data)
         user.set_password(mot_de_passe)
         user.mot_de_passe_provisoire = True
         user.save()
 
-        if modules_ids:
-            modules = Module.objects.filter(code__in=modules_ids, actif=True)
-            user.modules_autorises.set(modules)
-
-        if permissions_codes:
-            perms = PermissionGranulaire.objects.filter(code__in=permissions_codes)
-            user.permissions_granulaires.set(perms)
+        # Assigner permissions et modules selon le rôle
+        from .role_permissions import assigner_role
+        assigner_role(user, user.role, modules_supplementaires=modules_ids)
 
         return user
 
@@ -171,18 +203,16 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         modules_ids = validated_data.pop("modules_ids", None)
-        permissions_codes = validated_data.pop("permissions_codes", None)
+        validated_data.pop("permissions_codes", None)  # ignoré — calculé depuis le rôle
 
+        role_changed = "role" in validated_data
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        if modules_ids is not None:
-            modules = Module.objects.filter(code__in=modules_ids, actif=True)
-            instance.modules_autorises.set(modules)
-
-        if permissions_codes is not None:
-            perms = PermissionGranulaire.objects.filter(code__in=permissions_codes)
-            instance.permissions_granulaires.set(perms)
+        # Si le rôle change ou si on met à jour les modules, recalculer les permissions
+        if role_changed or modules_ids is not None:
+            from .role_permissions import assigner_role
+            assigner_role(instance, instance.role, modules_supplementaires=modules_ids)
 
         return instance
