@@ -1,20 +1,29 @@
-from .base import *
 import os
+import dj_database_url
+from .base import *
 
 DEBUG = False
+SECRET_KEY = os.environ["SECRET_KEY"]
 
-# Sécurité HTTPS en production
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
-# WhiteNoise pour les fichiers statiques
-MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")
+DATABASES = {
+    "default": dj_database_url.config(
+        conn_max_age=60,
+        conn_health_checks=True,
+    )
+}
+
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Logs vers fichier en production
-import logging
-LOGGING["root"]["handlers"] = ["console", "file"]
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+] + MIDDLEWARE[1:]
+
+LOGGING["handlers"].pop("file", None)
+LOGGING["loggers"]["apps"]["handlers"] = ["console"]
