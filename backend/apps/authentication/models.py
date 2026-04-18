@@ -94,6 +94,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name="Matricule"
     )
     nom = models.CharField(max_length=100, verbose_name="Nom")
+
+    # ── Informations personnelles ─────────────────────────────────────────────
+    telephone = models.CharField(max_length=25, blank=True, verbose_name="Téléphone")
+    telephone2 = models.CharField(max_length=25, blank=True, verbose_name="Téléphone 2 (optionnel)")
+    ville = models.CharField(max_length=100, blank=True, verbose_name="Ville de résidence")
+    quartier = models.CharField(max_length=100, blank=True, verbose_name="Quartier")
+    date_naissance = models.DateField(null=True, blank=True, verbose_name="Date de naissance")
+    situation_matrimoniale = models.CharField(
+        max_length=20, blank=True,
+        choices=[("celibataire", "Célibataire"), ("marie", "Marié(e)"), ("divorce", "Divorcé(e)"), ("veuf", "Veuf/Veuve")],
+        verbose_name="Situation matrimoniale"
+    )
     prenom = models.CharField(max_length=100, verbose_name="Prénom")
     role = models.CharField(
         max_length=20, choices=ROLES,

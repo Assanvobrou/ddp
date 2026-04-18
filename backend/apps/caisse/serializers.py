@@ -154,23 +154,38 @@ class PatientSerializer(serializers.ModelSerializer):
 class FichePaiementListSerializer(serializers.ModelSerializer):
     patient_nom = serializers.SerializerMethodField()
     patient_code = serializers.CharField(source="patient.numero_dossier", read_only=True)
+    patient_sexe = serializers.SerializerMethodField()
+    patient_age = serializers.SerializerMethodField()
     prestation_nom = serializers.CharField(source="prestation.nom", read_only=True)
     service_nom = serializers.CharField(source="service.nom", read_only=True)
     statut_display = serializers.CharField(source="get_statut_display", read_only=True)
-
+    creee_par_nom = serializers.SerializerMethodField()
     class Meta:
         model = FichePaiement
         fields = [
-            "id", "patient", "patient_nom", "patient_code",
+            "id", "reference", "patient", "patient_nom", "patient_code",
+            "patient_sexe", "patient_age",
             "prestation", "prestation_nom",
             "service", "service_nom",
             "prix_unitaire", "quantite", "montant_total",
             "taux_assurance", "montant_assurance", "montant_patient",
             "statut", "statut_display", "notes", "date_creation",
+            "creee_par_nom",
         ]
 
     def get_patient_nom(self, obj):
-        return f"{obj.patient.prenom} {obj.patient.nom}" 
+        return f"{obj.patient.prenom} {obj.patient.nom}"
+
+    def get_patient_sexe(self, obj):
+        return obj.patient.sexe
+
+    def get_patient_age(self, obj):
+        return obj.patient.age or None
+
+    def get_creee_par_nom(self, obj):
+        return obj.creee_par.nom_complet if obj.creee_par else "—"
+
+
 
 
 class FichePaiementCreateSerializer(serializers.ModelSerializer):
@@ -187,9 +202,11 @@ class FichePaiementCreateSerializer(serializers.ModelSerializer):
         prestation = validated_data["prestation"]
         patient = validated_data["patient"]
 
+        # Le taux vient de l'assurance du patient, pas de la prestation.
+        # La prestation indique seulement si elle est prise en charge (oui/non).
         taux_assurance = 0
-        if patient.a_assurance and prestation.prise_en_charge_assurance:
-            taux_assurance = prestation.taux_assurance
+        if patient.a_assurance and prestation.prise_en_charge_assurance and patient.assurance:
+            taux_assurance = patient.assurance.taux_defaut
 
         fiche = FichePaiement(
             **validated_data,

@@ -311,9 +311,30 @@ class FichePaiementListCreateView(generics.ListCreateAPIView):
         return FichePaiementListSerializer
 
     def get_queryset(self):
-        return FichePaiement.objects.select_related(
-            "patient", "prestation", "session", "creee_par"
+        from django.db.models import Q
+        qs = FichePaiement.objects.select_related(
+            "patient", "prestation", "session", "service", "creee_par"
         ).order_by("-date_creation")
+
+        statut = self.request.query_params.get("statut")
+        if statut:
+            qs = qs.filter(statut=statut)
+
+        # Recherche par référence reçu (pour le futur module Dossier Patient)
+        reference = self.request.query_params.get("reference")
+        if reference:
+            qs = qs.filter(reference__icontains=reference)
+
+        # Recherche par patient : code DDP, nom ou prénom
+        patient_q = self.request.query_params.get("patient")
+        if patient_q:
+            qs = qs.filter(
+                Q(patient__numero_dossier__icontains=patient_q) |
+                Q(patient__nom__icontains=patient_q) |
+                Q(patient__prenom__icontains=patient_q)
+            )
+
+        return qs
 
     def list(self, request, *args, **kwargs):
         qs = self.filter_queryset(self.get_queryset())

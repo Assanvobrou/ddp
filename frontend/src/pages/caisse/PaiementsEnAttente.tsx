@@ -8,6 +8,7 @@ import {
   Unlock, AlertCircle
 } from 'lucide-react'
 import { caisseAPI } from '@/services/api'
+import TicketRecu from '@/components/TicketRecu'
 import { useCaisse } from '@/context/CaisseContext'
 import { AppLayout, Topbar } from '@/components/layout/AppLayout'
 import { Button, Card, CardHeader, Modal, Badge, EmptyState, Spinner } from '@/components/ui'
@@ -129,10 +130,12 @@ export default function PaiementsEnAttente() {
 
   const validateMut = useMutation({
     mutationFn: ({ id }: { id: string }) => caisseAPI.fiches.update(id, { statut: 'paye' }),
-    onSuccess: (_, { id }) => {
+    onSuccess: (res, { id }) => {
       const f = (fiches as any[]).find(f => f.id === id)
       setFicheToValidate(null)
-      setFichePrintee(f)
+      // Forcer statut paye sur l'objet passé au reçu — la liste sera rafraîchie après
+      const fichePayee = { ...f, statut: 'paye', statut_display: 'Payé' }
+      setFichePrintee(fichePayee)
       toast.success('Paiement validé')
       qc.invalidateQueries({ queryKey: ['fiches-en-attente'] })
       qc.invalidateQueries({ queryKey: ['fiches-validees'] })
@@ -216,8 +219,8 @@ export default function PaiementsEnAttente() {
       </Modal>
 
       {/* Modal reçu */}
-      <Modal open={!!fichePrintee} onClose={() => setFichePrintee(null)} title="Reçu de paiement">
-        {fichePrintee && <RecuPaiement fiche={fichePrintee} onClose={() => setFichePrintee(null)} />}
+      <Modal open={!!fichePrintee} onClose={() => setFichePrintee(null)} title="Reçu de paiement" size="lg">
+        {fichePrintee && <TicketRecu fiche={fichePrintee} onClose={() => setFichePrintee(null)} />}
       </Modal>
     </AppLayout>
   )

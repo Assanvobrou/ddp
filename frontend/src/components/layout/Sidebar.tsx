@@ -31,7 +31,8 @@ const CAISSE_ITEMS_RESPONSABLE = [
 const CONFIG_ITEMS = [
   { path: '/configuration/prestations', label: 'Prestations', icon: <Stethoscope size={16} strokeWidth={1.75} /> },
   { path: '/configuration/assurances',  label: 'Assurances',  icon: <Shield size={16} strokeWidth={1.75} /> },
-  { path: '/configuration/personnel',   label: 'Personnel',   icon: <UserCog size={16} strokeWidth={1.75} /> },
+  { path: '/configuration/personnel',   label: 'Personnel',      icon: <UserCog size={16} strokeWidth={1.75} /> },
+  { path: '/configuration/utilisateurs', label: 'Utilisateurs',   icon: <Users size={16} strokeWidth={1.75} /> },
   { path: '/configuration/parametres',  label: 'Paramètres',  icon: <SlidersHorizontal size={16} strokeWidth={1.75} /> },
 ]
 

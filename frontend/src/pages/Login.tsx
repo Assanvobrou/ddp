@@ -129,6 +129,11 @@ export default function Login() {
               leftIcon={<User size={15} strokeWidth={1.75} />}
               error={errors.email?.message}
               autoComplete="username"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                e.target.value = e.target.value.toLowerCase()
+                register('email').onChange(e)
+              }}
+              style={{ textTransform: 'lowercase' as const }}
             />
             <Input
               {...register('password')}

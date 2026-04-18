@@ -5,11 +5,12 @@ import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import {
-  CheckCircle, Printer, X, Receipt,
+  CheckCircle, Printer, X, Receipt, Download,
   TrendingUp, BarChart2, CheckSquare,
   Shield, Clock, ArrowLeftRight, AlertTriangle
 } from 'lucide-react'
 import { caisseAPI } from '@/services/api'
+import TicketRecu from '@/components/TicketRecu'
 import { AppLayout, Topbar } from '@/components/layout/AppLayout'
 import {
   Button, Card, CardHeader, Input, Textarea,
@@ -22,7 +23,7 @@ const fmt = (v: string | number) => Number(v).toLocaleString('fr-FR') + ' FCFA'
 export function RecuPaiement({ fiche, onClose }: { fiche: any; onClose: () => void }) {
   return (
     <div className="space-y-4">
-      <div className="border border-surface-200 rounded-xl p-5 text-sm print:border-none">
+      <div id="print-ticket" className="border border-surface-200 rounded-xl p-5 text-sm print:border-none">
         <div className="text-center mb-4 pb-3 border-b border-surface-100">
           <h2 className="text-base font-black text-ink">Dossier Du Patient — DDP</h2>
           <p className="text-xs text-ink-faint">Reçu de paiement · {format(new Date(), 'dd MMMM yyyy HH:mm', { locale: fr })}</p>
@@ -46,7 +47,8 @@ export function RecuPaiement({ fiche, onClose }: { fiche: any; onClose: () => vo
           <span>Statut : Payé</span><span>DDP — {format(new Date(), 'dd/MM/yyyy')}</span>
         </div>
       </div>
-      <div className="flex gap-2">
+      {/* Boutons — masqués à l'impression */}
+      <div className="flex gap-2 no-print">
         <Button variant="secondary" className="flex-1" onClick={onClose}><X size={15} strokeWidth={1.75} />Fermer</Button>
         <Button className="flex-1" onClick={() => window.print()}><Printer size={15} strokeWidth={1.75} />Imprimer</Button>
       </div>
@@ -104,8 +106,8 @@ export function PaiementsValides() {
           )}
         </Card>
       </div>
-      <Modal open={!!fichePrintee} onClose={() => setFichePrintee(null)} title="Reçu de paiement">
-        {fichePrintee && <RecuPaiement fiche={fichePrintee} onClose={() => setFichePrintee(null)} />}
+      <Modal open={!!fichePrintee} onClose={() => setFichePrintee(null)} title="Reçu de paiement" size="lg">
+        {fichePrintee && <TicketRecu fiche={fichePrintee} onClose={() => setFichePrintee(null)} />}
       </Modal>
     </AppLayout>
   )
@@ -223,6 +225,129 @@ function FormulaireValidation({ sessionId, session, onClose }: { sessionId: stri
   )
 }
 
+
+// ── EXPORT EXCEL ──────────────────────────────────────────────────────────────
+function exportExcel(data: any, mois: string) {
+  if (!data) return
+  const rows: string[][] = []
+
+  // En-tête
+  rows.push(['RAPPORT FINANCIER MENSUEL — DDP'])
+  rows.push([`Période : ${mois}`])
+  rows.push([`Généré le : ${new Date().toLocaleDateString('fr-FR')}`])
+  rows.push([])
+
+  // Totaux
+  rows.push(['SYNTHÈSE'])
+  rows.push(['Recettes totales', String(data.total_recettes || 0)])
+  rows.push(['Part patients', String(data.total_patient || 0)])
+  rows.push(['Part assurances', String(data.total_assurance || 0)])
+  rows.push(['Nombre de patients', String(data.nb_patients || 0)])
+  rows.push([])
+
+  // Par prestation
+  if (data.par_prestation?.length) {
+    rows.push(['DÉTAIL PAR PRESTATION'])
+    rows.push(['Prestation', 'Nb actes', 'Total (FCFA)', 'Part patient (FCFA)', 'Part assurance (FCFA)'])
+    data.par_prestation.forEach((p: any) => {
+      rows.push([p.nom_prestation, String(p.nb), String(p.total), String(p.total_patient), String(p.total_assurance || 0)])
+    })
+    rows.push([])
+  }
+
+  // Sessions
+  if (data.sessions?.length) {
+    rows.push(['SESSIONS DU MOIS'])
+    rows.push(['Date', 'Caissière', 'Système (FCFA)', 'Soumis (FCFA)', 'Statut'])
+    data.sessions.forEach((s: any) => {
+      rows.push([s.date_session, s.ouverte_par_nom, String(s.montant_systeme), s.montant_compte ? String(s.montant_compte) : '—', s.statut_display])
+    })
+  }
+
+  // Génération CSV
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(';')).join('\n')
+  const bom = '\uFEFF' // UTF-8 BOM pour Excel
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `rapport-ddp-${mois}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+// ── IMPRESSION RAPPORT ────────────────────────────────────────────────────────
+function printRapport(data: any, mois: string) {
+  if (!data) return
+  const win = window.open('', '_blank', 'width=900,height=700')
+  if (!win) return
+
+  const fmt = (v: any) => Number(v || 0).toLocaleString('fr-FR')
+
+  const prestation_rows = (data.par_prestation || []).map((p: any) => `
+    <tr>
+      <td>${p.nom_prestation}</td>
+      <td style="text-align:right">${p.nb}</td>
+      <td style="text-align:right">${fmt(p.total)}</td>
+      <td style="text-align:right">${fmt(p.total_patient)}</td>
+      <td style="text-align:right">${fmt(p.total_assurance || 0)}</td>
+    </tr>`).join('')
+
+  const session_rows = (data.sessions || []).map((s: any) => `
+    <tr>
+      <td>${s.date_session}</td>
+      <td>${s.ouverte_par_nom}</td>
+      <td style="text-align:right">${fmt(s.montant_systeme)}</td>
+      <td style="text-align:right">${s.montant_compte ? fmt(s.montant_compte) : '—'}</td>
+      <td>${s.statut_display}</td>
+    </tr>`).join('')
+
+  win.document.write(`
+    <html><head><title>Rapport DDP ${mois}</title>
+    <style>
+      @page { size: A4; margin: 15mm; }
+      body { font-family: Arial, sans-serif; font-size: 11px; color: #111; }
+      h1 { font-size: 16px; margin-bottom: 4px; }
+      h2 { font-size: 12px; margin: 12px 0 6px; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+      th { background: #f0f0f0; border: 1px solid #ccc; padding: 4px 6px; text-align: left; font-size: 10px; text-transform: uppercase; }
+      td { border: 1px solid #ddd; padding: 4px 6px; }
+      .totaux { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 16px; }
+      .stat { border: 1px solid #ddd; padding: 8px; border-radius: 4px; }
+      .stat .val { font-size: 16px; font-weight: bold; }
+      .stat .lbl { font-size: 9px; color: #666; text-transform: uppercase; }
+      .footer { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 8px; }
+    </style></head><body>
+    <h1>Rapport Financier Mensuel — DDP</h1>
+    <p style="color:#555;font-size:10px">Période : ${mois} · Généré le ${new Date().toLocaleDateString('fr-FR')}</p>
+
+    <div class="totaux">
+      <div class="stat"><div class="val">${fmt(data.total_recettes)} FCFA</div><div class="lbl">Recettes totales</div></div>
+      <div class="stat"><div class="val">${fmt(data.total_patient)} FCFA</div><div class="lbl">Part patients</div></div>
+      <div class="stat"><div class="val">${fmt(data.total_assurance)} FCFA</div><div class="lbl">Part assurances</div></div>
+      <div class="stat"><div class="val">${data.nb_patients || 0}</div><div class="lbl">Patients</div></div>
+    </div>
+
+    <h2>Détail par prestation</h2>
+    <table>
+      <thead><tr><th>Prestation</th><th>Actes</th><th>Total (FCFA)</th><th>Part patient</th><th>Part assurance</th></tr></thead>
+      <tbody>${prestation_rows || '<tr><td colspan="5" style="color:#999">Aucune donnée</td></tr>'}</tbody>
+    </table>
+
+    <h2>Sessions du mois</h2>
+    <table>
+      <thead><tr><th>Date</th><th>Caissière</th><th>Système (FCFA)</th><th>Soumis (FCFA)</th><th>Statut</th></tr></thead>
+      <tbody>${session_rows || '<tr><td colspan="5" style="color:#999">Aucune session</td></tr>'}</tbody>
+    </table>
+
+    <div class="footer">DDP — Dossier Du Patient · Rapport confidentiel</div>
+    </body></html>
+  `)
+  win.document.close()
+  win.focus()
+  setTimeout(() => { win.print(); win.close() }, 400)
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // PAGE 5 : Rapports
 // ══════════════════════════════════════════════════════════════════════════════
@@ -239,7 +364,16 @@ export function Rapports() {
   return (
     <AppLayout>
       <Topbar title="Rapports" subtitle="Analyse financière mensuelle"
-        actions={<Button size="sm" variant="secondary" onClick={() => window.print()}><Printer size={14} strokeWidth={1.75} />Imprimer</Button>} />
+        actions={
+          <div className="flex gap-2">
+            <Button size="sm" variant="secondary" onClick={() => exportExcel(data, moisFiltre)}>
+              <Download size={14} strokeWidth={1.75} />Exporter Excel
+            </Button>
+            <Button size="sm" variant="secondary" onClick={() => printRapport(data, moisFiltre)}>
+              <Printer size={14} strokeWidth={1.75} />Imprimer
+            </Button>
+          </div>
+        } />
       <div className="p-6 space-y-5">
         <Card>
           <div className="flex items-end gap-3">
@@ -304,8 +438,9 @@ export function Rapports() {
   )
 }
 
+// ── Aliases compatibilité router ──────────────────────────────────────────────
 export { default as PaiementsEnAttente } from './PaiementsEnAttente'
 export { default as ClotureCaisse } from './ClotureCaisse'
-export { Rapports as DashboardRecettes }
-export { Rapports as GestionCaisse }
-export { PaiementsValides as FichesPaiement }
+export function GestionCaisse() { const C = require('./ClotureCaisse').default; return <C /> }
+export function FichesPaiement() { const P = require('./PaiementsEnAttente').default; return <P /> }
+export function DashboardRecettes() { return <Rapports /> }

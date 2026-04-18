@@ -168,8 +168,36 @@ export function NouveauPatient() {
               <div className="grid grid-cols-3 gap-3 mt-3">
                 <Select {...register('sexe')} label="Sexe *"
                   options={[{value:'M',label:'Masculin'},{value:'F',label:'Féminin'},{value:'A',label:'Autre'}]} />
-                <Input {...register('date_naissance')} label="Date de naissance" type="date" />
-                <Input {...register('age')} label="OU Age (ans)" type="number" placeholder="34" error={errors.age?.message} />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-ink-muted">Date de naissance</label>
+                  <input type="date"
+                    {...register('date_naissance')}
+                    onChange={e => {
+                      register('date_naissance').onChange(e)
+                      const d = new Date(e.target.value)
+                      if (!isNaN(d.getTime())) {
+                        const age = Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000))
+                        setValue('age', age)
+                      }
+                    }}
+                    className="h-11 px-3 bg-surface-50 border border-surface-200 rounded-xl text-sm outline-none focus:border-primary-600" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-ink-muted">OU Âge (ans)</label>
+                  <input type="number" placeholder="34"
+                    {...register('age')}
+                    onChange={e => {
+                      register('age').onChange(e)
+                      const age = parseInt(e.target.value)
+                      if (!isNaN(age) && age > 0 && age < 130) {
+                        const d = new Date()
+                        d.setFullYear(d.getFullYear() - age)
+                        setValue('date_naissance', d.toISOString().split('T')[0])
+                      }
+                    }}
+                    className="h-11 px-3 bg-surface-50 border border-surface-200 rounded-xl text-sm outline-none focus:border-primary-600" />
+                  {errors.age && <p className="text-xs text-red-600">{errors.age.message as string}</p>}
+                </div>
               </div>
             </div>
             <div>

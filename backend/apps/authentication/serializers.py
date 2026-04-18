@@ -105,55 +105,47 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Création d'un utilisateur par l'admin/directrice."""
+    """
+    Création d'un utilisateur (personnel de la clinique).
+    Email non requis — auto-généré depuis le matricule.
+    Matricule = identifiant de connexion (ex: b.assanvo).
+    """
     mot_de_passe = serializers.CharField(write_only=True, required=True)
     modules_ids = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False
-    )
-    permissions_codes = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=False
     )
 
     class Meta:
         model = User
         fields = [
-            "email", "matricule", "nom", "prenom", "role",
-            "mot_de_passe", "modules_ids", "permissions_codes",
+            "matricule", "nom", "prenom", "role",
+            "telephone", "telephone2", "ville", "quartier",
+            "date_naissance", "situation_matrimoniale",
+            "mot_de_passe", "modules_ids",
         ]
 
-    def validate_email(self, value):
+    def validate_matricule(self, value):
         return value.lower().strip()
 
-    def validate_matricule(self, value):
-        if value:
-            return value.upper().strip()
-        return value
-
     def validate_mot_de_passe(self, value):
-        """
-        Mot de passe agent : PIN de 4 chiffres minimum (ex: 1234).
-        Pour le super admin, utiliser un mot de passe fort en ligne de commande.
-        """
-        if not value.isdigit():
-            raise serializers.ValidationError("Le mot de passe doit contenir uniquement des chiffres.")
+        """Mot de passe : tout caractère accepté, minimum 4 caractères."""
         if len(value) < 4:
-            raise serializers.ValidationError("Le mot de passe doit contenir au moins 4 chiffres.")
+            raise serializers.ValidationError("Le mot de passe doit contenir au moins 4 caractères.")
         return value
 
     def create(self, validated_data):
         modules_ids = validated_data.pop("modules_ids", [])
-        validated_data.pop("permissions_codes", [])  # ignoré — calculé depuis le rôle
         mot_de_passe = validated_data.pop("mot_de_passe")
+        matricule = validated_data.get("matricule", "")
 
-        # Auto-générer le matricule si non fourni : prenom[0].nom (ex: b.assanvo)
-        if not validated_data.get("matricule"):
+        # Auto-générer le matricule si absent
+        if not matricule:
             prenom = validated_data.get("prenom", "")
             nom = validated_data.get("nom", "")
             def slug(s):
                 nfkd = unicodedata.normalize("NFKD", s)
                 return re.sub(r"[^a-z0-9]", "", nfkd.encode("ascii","ignore").decode().lower())
             base = f"{slug(prenom)[:1]}.{slug(nom)}"
-            # Garantir l'unicité
             matricule = base
             counter = 2
             while User.objects.filter(matricule=matricule).exists():
@@ -161,12 +153,19 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 counter += 1
             validated_data["matricule"] = matricule
 
+        # Email auto-généré depuis le matricule (requis par Django auth)
+        email = f"{validated_data['matricule']}@ddp.local"
+        counter = 2
+        while User.objects.filter(email=email).exists():
+            email = f"{validated_data['matricule']}{counter}@ddp.local"
+            counter += 1
+        validated_data["email"] = email
+
         user = User(**validated_data)
         user.set_password(mot_de_passe)
         user.mot_de_passe_provisoire = True
         user.save()
 
-        # Assigner permissions et modules selon le rôle
         from .role_permissions import assigner_role
         assigner_role(user, user.role, modules_supplementaires=modules_ids)
 
@@ -216,3 +215,14 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             assigner_role(instance, instance.role, modules_supplementaires=modules_ids)
 
         return instance
+
+
+class AdminChangePasswordSerializer(serializers.Serializer):
+    """Changement de mot de passe d'un utilisateur par l'admin."""
+    nouveau_mot_de_passe = serializers.CharField(required=True, write_only=True)
+
+    def validate_nouveau_mot_de_passe(self, value):
+        """Mot de passe : tout caractère accepté, minimum 4 caractères."""
+        if len(value) < 4:
+            raise serializers.ValidationError("Le mot de passe doit contenir au moins 4 caractères.")
+        return value

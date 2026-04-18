@@ -205,6 +205,11 @@ class FichePaiement(models.Model):
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    reference = models.CharField(
+        max_length=30, unique=True, blank=True,
+        verbose_name="Référence du reçu",
+        help_text="Numéro unique retrouvable dans le dossier patient. Ex: FICHE-2026-A3B9F12C"
+    )
     patient = models.ForeignKey(
         Patient, on_delete=models.PROTECT,
         related_name="fiches_paiement", verbose_name="Patient"
@@ -267,6 +272,14 @@ class FichePaiement(models.Model):
         return f"Fiche {self.patient} — {self.prestation} — {self.montant_total} FCFA"
 
     def save(self, *args, **kwargs):
+        # Génération de la référence unique si pas encore définie
+        if not self.reference:
+            from django.utils import timezone as tz
+            annee = tz.localdate().year
+            # 8 caractères hex depuis l'UUID — lisible et unique
+            hex_part = self.id.hex[:8].upper()
+            self.reference = f"FICHE-{annee}-{hex_part}"
+
         # Calcul automatique des montants
         self.montant_total = self.prix_unitaire * self.quantite
         self.montant_assurance = (self.montant_total * self.taux_assurance / 100).quantize(

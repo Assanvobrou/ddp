@@ -29,7 +29,6 @@ const prestationSchema = z.object({
   prix: z.coerce.number().min(0, 'Prix invalide'),
   service: z.string().optional(),
   prise_en_charge_assurance: z.boolean().default(false),
-  taux_assurance: z.coerce.number().min(0).max(100).default(0),
   ordre: z.coerce.number().default(0),
 })
 type PrestationForm = z.infer<typeof prestationSchema>
@@ -74,7 +73,6 @@ export function Prestations() {
     setValue('nom', p.nom)
     setValue('prix', Number(p.prix))
     setValue('prise_en_charge_assurance', p.prise_en_charge_assurance)
-    setValue('taux_assurance', p.taux_assurance)
     setValue('ordre', p.ordre)
     setShowForm(true)
   }
@@ -115,7 +113,7 @@ export function Prestations() {
                           {p.prise_en_charge_assurance ? 'Oui' : 'Non'}
                         </Badge>
                       </td>
-                      <td className="px-5 py-3.5 text-ink-muted">{p.prise_en_charge_assurance ? `${p.taux_assurance}%` : '—'}</td>
+                      <td className="px-5 py-3.5 text-ink-muted">{p.prise_en_charge_assurance ? 'Selon assurance' : '—'}</td>
                       <td className="px-5 py-3.5 text-ink-faint">{p.ordre}</td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-1">
@@ -154,8 +152,9 @@ export function Prestations() {
             <span className="text-sm font-medium text-ink">Prise en charge assurance</span>
           </label>
           {pAssurance && (
-            <Input {...register('taux_assurance')} label="Taux de prise en charge (%)"
-              type="number" placeholder="70" error={errors.taux_assurance?.message} />
+            <div className="bg-primary-50 border border-primary-100 rounded-xl px-3 py-2.5 text-xs text-primary-700 font-medium">
+              Le taux de prise en charge sera celui de l'assurance du patient, défini dans Configuration → Assurances.
+            </div>
           )}
           <div className="flex gap-2 pt-2">
             <Button type="button" variant="secondary" className="flex-1" onClick={() => { setShowForm(false); setEditing(null); reset() }}>Annuler</Button>

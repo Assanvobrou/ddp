@@ -105,6 +105,9 @@ export const authAPI = {
     update: (id: string, data: unknown) => api.patch(`/auth/users/${id}/`, data),
     deactivate: (id: string) => api.delete(`/auth/users/${id}/`),
     assignerRole: (id: string, role: string) => api.post(`/auth/users/${id}/assigner-role/`, { role }),
+    changerMotDePasse: (id: string, pwd: string) => api.post(`/auth/users/${id}/changer-mot-de-passe/`, { nouveau_mot_de_passe: pwd }),
+    checkMatricule: (matricule: string, excludeId?: string) =>
+      api.get('/auth/check-matricule/', { params: { matricule, ...(excludeId ? { exclude: excludeId } : {}) } }),
   },
   modules: () => api.get('/auth/modules/'),
 }

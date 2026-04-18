@@ -224,3 +224,48 @@ class AssignerRoleView(APIView):
             "message": f"Rôle {user.get_role_display()} assigné à {user.nom_complet}.",
             "data": UserListSerializer(user).data,
         })
+
+
+class AdminChangerMotDePasseView(APIView):
+    """POST /auth/users/<id>/changer-mot-de-passe/ — admin change le PIN d'un utilisateur."""
+    permission_classes = [permissions.IsAuthenticated, CanGererPersonnel]
+
+    def post(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"success": False, "erreur": "Utilisateur introuvable."}, status=404)
+
+        from .serializers import AdminChangePasswordSerializer
+        serializer = AdminChangePasswordSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({"success": False, "erreur": serializer.errors}, status=400)
+
+        user.set_password(serializer.validated_data["nouveau_mot_de_passe"])
+        user.mot_de_passe_provisoire = False
+        user.save(update_fields=["password", "mot_de_passe_provisoire"])
+
+        AuditLog.log(request.user, "modification_user",
+            details={"cible_id": str(user.id), "action": "changement_pin_admin"},
+            request=request)
+
+        return Response({"success": True, "message": f"PIN mis à jour pour {user.nom_complet}."})
+
+
+class CheckMatriculeView(APIView):
+    """GET /auth/check-matricule/?matricule=b.assanvo — vérifie si un matricule est disponible."""
+    permission_classes = [permissions.IsAuthenticated, CanGererPersonnel]
+
+    def get(self, request):
+        matricule = request.query_params.get("matricule", "").lower().strip()
+        if not matricule:
+            return Response({"disponible": False, "erreur": "Matricule requis."})
+        
+        # Exclure l'utilisateur en cours de modification si pk fourni
+        exclude_pk = request.query_params.get("exclude")
+        qs = User.objects.filter(matricule=matricule)
+        if exclude_pk:
+            qs = qs.exclude(pk=exclude_pk)
+        
+        disponible = not qs.exists()
+        return Response({"disponible": disponible, "matricule": matricule})
