@@ -441,4 +441,4 @@ export function Rapports() {
 // ── Aliases compatibilité router ──────────────────────────────────────────────
 export { default as PaiementsEnAttente } from './PaiementsEnAttente'
 export { default as ClotureCaisse } from './ClotureCaisse'
-export function DashboardRecettes() { return <Rapports /> }
+export { Rapports as DashboardRecettes }

@@ -124,8 +124,8 @@ export default function Sidebar() {
         {activeModule && subItems.length > 0 ? (
           <>
             <button onClick={() => navigate('/modules')}
-              className="flex items-center gap-2 w-full px-2.5 py-2 mb-2 text-[12px] font-semibold text-ink-faint hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
-              <ChevronLeft size={14} />Tous les modules
+              className="flex items-center gap-2 w-full px-3 py-2.5 mb-3 text-[12.5px] font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 border border-primary-200 rounded-xl transition-colors">
+              <ChevronLeft size={16} strokeWidth={2} />Changer de module
             </button>
             <div className="flex items-center gap-2 px-2.5 py-1.5 mb-1">
               <span className="text-ink-muted">
