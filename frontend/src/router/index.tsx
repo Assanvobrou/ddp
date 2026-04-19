@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import Login from '@/pages/Login'
+import Landing from '@/pages/Landing'
 import ModuleSelector from '@/pages/ModuleSelector'
 import ChangePassword from '@/pages/ChangePassword'
 import { PatientsList, NouveauPatient, PatientDetail } from '@/pages/bureau'
@@ -26,11 +27,22 @@ function ProtectedRoute({ children, permission }: { children: JSX.Element; permi
   return children
 }
 
+/** Redirige vers /modules si connecté, sinon affiche la Landing */
+function LandingOrApp() {
+  const { isAuthenticated, isLoading } = useAuth()
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-surface-100">
+      <div className="w-7 h-7 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
+  return isAuthenticated ? <Navigate to="/modules" replace /> : <Landing />
+}
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/connexion" replace />} />
+        <Route path="/" element={<LandingOrApp />} />
         <Route path="/connexion" element={<Login />} />
         <Route path="/modules" element={<ProtectedRoute><ModuleSelector /></ProtectedRoute>} />
         <Route path="/changer-mot-de-passe" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
