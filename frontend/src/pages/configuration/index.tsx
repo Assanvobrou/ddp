@@ -22,6 +22,131 @@ import {
 import type { Prestation, Assurance } from '@/types'
 
 // ══════════════════════════════════════════════════════════════════════════════
+// PAGE : Services
+// ══════════════════════════════════════════════════════════════════════════════
+const serviceSchema = z.object({
+  nom: z.string().min(1, 'Nom requis'),
+  code: z.string().min(1, 'Code requis').max(20),
+  description: z.string().optional(),
+  ordre: z.coerce.number().default(0),
+})
+type ServiceForm = z.infer<typeof serviceSchema>
+
+export function Services() {
+  const qc = useQueryClient()
+  const [showForm, setShowForm] = useState(false)
+  const [editing, setEditing] = useState<any>(null)
+
+  const { data: services = [], isLoading } = useQuery({
+    queryKey: ['services'],
+    queryFn: () => configAPI.services.list().then(r => r.data.data),
+  })
+
+  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<ServiceForm>({
+    resolver: zodResolver(serviceSchema),
+  })
+
+  const saveMut = useMutation({
+    mutationFn: (data: ServiceForm) =>
+      editing ? configAPI.services.update(editing.id, data) : configAPI.services.create(data),
+    onSuccess: () => {
+      toast.success(editing ? 'Service modifié' : 'Service créé')
+      reset(); setShowForm(false); setEditing(null)
+      qc.invalidateQueries({ queryKey: ['services'] })
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.erreur || 'Erreur'),
+  })
+
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => configAPI.services.delete(id),
+    onSuccess: () => { toast.success('Service supprimé'); qc.invalidateQueries({ queryKey: ['services'] }) },
+  })
+
+  const openEdit = (s: any) => {
+    setEditing(s)
+    setValue('nom', s.nom)
+    setValue('code', s.code)
+    setValue('description', s.description || '')
+    setValue('ordre', s.ordre)
+    setShowForm(true)
+  }
+
+  return (
+    <AppLayout>
+      <Topbar title="Services" subtitle="Départements médicaux de la clinique"
+        actions={
+          <Button size="sm" onClick={() => { reset(); setEditing(null); setShowForm(true) }}>
+            <Plus size={15} strokeWidth={1.75} />Nouveau service
+          </Button>
+        }
+      />
+      <div className="p-6">
+        <Card padding={false}>
+          <CardHeader title="Services" icon={<Building2 size={16} strokeWidth={1.75} />}
+            subtitle={`${(services as any[]).length} service(s)`} />
+          {isLoading ? <div className="flex justify-center py-8"><Spinner size={24} /></div>
+          : (services as any[]).length === 0
+            ? <EmptyState icon={<Building2 size={22} strokeWidth={1.5} />} title="Aucun service"
+                action={<Button size="sm" onClick={() => setShowForm(true)}><Plus size={14} />Ajouter</Button>} />
+          : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-surface-50 border-b border-surface-100">
+                  <tr>{['Nom','Code','Description','Ordre',''].map((h,i) => (
+                    <th key={i} className="px-5 py-3 text-left text-[10.5px] font-bold text-ink-faint uppercase tracking-wide">{h}</th>
+                  ))}</tr>
+                </thead>
+                <tbody>
+                  {(services as any[]).map((s: any) => (
+                    <tr key={s.id} className="border-b border-surface-50 hover:bg-surface-50">
+                      <td className="px-5 py-3.5 font-semibold text-ink">{s.nom}</td>
+                      <td className="px-5 py-3.5"><code className="bg-surface-100 px-2 py-0.5 rounded text-xs font-bold">{s.code}</code></td>
+                      <td className="px-5 py-3.5 text-ink-muted text-xs">{s.description || '—'}</td>
+                      <td className="px-5 py-3.5 text-ink-faint">{s.ordre}</td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => openEdit(s)}
+                            className="p-1.5 rounded-lg text-ink-faint hover:text-primary-600 hover:bg-primary-50">
+                            <Pencil size={14} strokeWidth={1.75} />
+                          </button>
+                          <button onClick={() => deleteMut.mutate(s.id)}
+                            className="p-1.5 rounded-lg text-ink-faint hover:text-red-600 hover:bg-red-50">
+                            <Trash2 size={14} strokeWidth={1.75} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      <Modal open={showForm} onClose={() => { setShowForm(false); setEditing(null); reset() }}
+        title={editing ? 'Modifier le service' : 'Nouveau service'}>
+        <form onSubmit={handleSubmit(d => saveMut.mutate(d))} className="space-y-4">
+          <Input {...register('nom')} label="Nom *" placeholder="Gynécologie" error={errors.nom?.message} />
+          <div className="grid grid-cols-2 gap-3">
+            <Input {...register('code')} label="Code *" placeholder="GYNECO" error={errors.code?.message} />
+            <Input {...register('ordre')} label="Ordre" type="number" placeholder="0" />
+          </div>
+          <Input {...register('description')} label="Description" placeholder="Description optionnelle" />
+          <div className="flex gap-2 pt-2">
+            <Button type="button" variant="secondary" className="flex-1"
+              onClick={() => { setShowForm(false); setEditing(null); reset() }}>Annuler</Button>
+            <Button type="submit" loading={isSubmitting} className="flex-1">
+              <CheckCircle size={15} strokeWidth={1.75} />{editing ? 'Modifier' : 'Créer'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    </AppLayout>
+  )
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
 // PAGE : Prestations
 // ══════════════════════════════════════════════════════════════════════════════
 const prestationSchema = z.object({
@@ -208,7 +333,7 @@ export function Assurances() {
     setEditing(a)
     setValue('nom', a.nom)
     setValue('code', a.code)
-    setValue('taux_defaut', parseFloat(a.taux_defaut))
+    setValue('taux_defaut', a.taux_defaut)
     setShowForm(true)
   }
 

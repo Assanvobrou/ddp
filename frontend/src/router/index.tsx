@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from '@/context/AuthContext'
 import Login from '@/pages/Login'
-import Landing from '@/pages/Landing'
 import ModuleSelector from '@/pages/ModuleSelector'
 import ChangePassword from '@/pages/ChangePassword'
 import { PatientsList, NouveauPatient, PatientDetail } from '@/pages/bureau'
@@ -11,7 +10,7 @@ import {
   ClotureCaisse, Versements, Rapports
 } from '@/pages/caisse'
 import {
-  Prestations, Assurances, Personnel, ParametresClinique
+  Services, Prestations, Assurances, Personnel, ParametresClinique
 } from '@/pages/configuration'
 import { PersonnelList, Utilisateurs } from '@/pages/configuration/Personnel'
 
@@ -31,7 +30,7 @@ export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<Navigate to="/connexion" replace />} />
         <Route path="/connexion" element={<Login />} />
         <Route path="/modules" element={<ProtectedRoute><ModuleSelector /></ProtectedRoute>} />
         <Route path="/changer-mot-de-passe" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
@@ -54,6 +53,7 @@ export default function AppRouter() {
         <Route path="/caisse/rapports" element={<ProtectedRoute permission="caisse.voir_dashboard_recettes"><Rapports /></ProtectedRoute>} />
 
         {/* Configuration */}
+        <Route path="/configuration/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
         <Route path="/configuration/prestations" element={<ProtectedRoute><Prestations /></ProtectedRoute>} />
         <Route path="/configuration/assurances" element={<ProtectedRoute><Assurances /></ProtectedRoute>} />
         <Route path="/configuration/personnel" element={<ProtectedRoute><PersonnelList /></ProtectedRoute>} />
