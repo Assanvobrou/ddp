@@ -15,6 +15,7 @@ DATABASES = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = []
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
