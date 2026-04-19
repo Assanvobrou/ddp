@@ -1,6 +1,6 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
-  Banknote, Settings, LayoutGrid, LogOut,
+  Banknote, Settings, LogOut,
   Receipt, Stethoscope, Users, Building2,
   Shield, UserCog, SlidersHorizontal, ChevronLeft,
   Lock, Unlock, DoorOpen, ClipboardList,
@@ -84,8 +84,9 @@ export default function Sidebar() {
   return (
     <aside className="w-56 flex-shrink-0 bg-white flex flex-col h-screen sticky top-0 overflow-hidden border-r border-surface-200 shadow-sidebar">
 
-      <div className="px-4 py-4 border-b border-surface-100">
-        <div className="flex items-center gap-2.5 mb-3">
+      {/* Logo — identité de l'app uniquement */}
+      <div className="px-4 py-3.5 border-b border-surface-100">
+        <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white flex-shrink-0">
             <Stethoscope size={15} strokeWidth={2} />
           </div>
@@ -94,17 +95,9 @@ export default function Sidebar() {
             <div className="text-[9px] text-ink-faint font-semibold uppercase tracking-widest">DDP</div>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-surface-50 rounded-lg px-2.5 py-2">
-          <div className="w-7 h-7 rounded-full bg-primary-600 flex items-center justify-center text-white text-[10px] font-black flex-shrink-0">
-            {user.prenom[0]}{user.nom[0]}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[11.5px] font-bold text-ink truncate">{user.nom_complet}</div>
-            <div className="text-[10px] text-ink-faint truncate">{user.role_display}</div>
-          </div>
-        </div>
       </div>
 
+      {/* Statut caisse — info contextuelle utile */}
       {showCaisseStatus && (
         <div className="px-3 pt-3">
           <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-semibold border
@@ -120,21 +113,17 @@ export default function Sidebar() {
         </div>
       )}
 
+      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto scrollbar-none px-2.5 py-3">
         {activeModule && subItems.length > 0 ? (
           <>
+            {/* Retour — premier élément, toujours visible */}
             <button onClick={() => navigate('/modules')}
-              className="flex items-center gap-2 w-full px-3 py-2.5 mb-3 text-[12.5px] font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 border border-primary-200 rounded-xl transition-colors">
+              className="flex items-center gap-2 w-full px-3 py-2.5 mb-4 text-[12.5px] font-bold text-primary-600 bg-primary-50 hover:bg-primary-100 border border-primary-200 rounded-xl transition-colors">
               <ChevronLeft size={16} strokeWidth={2} />Changer de module
             </button>
-            <div className="flex items-center gap-2 px-2.5 py-1.5 mb-1">
-              <span className="text-ink-muted">
-                {MODULE_ICONS[activeModule === 'bureau' ? 'bureau_entrees' : activeModule]}
-              </span>
-              <span className="text-[11px] font-bold text-ink uppercase tracking-wider">
-                {user.modules.find(m => m.code === (activeModule === 'bureau' ? 'bureau_entrees' : activeModule))?.nom || activeModule}
-              </span>
-            </div>
+
+            {/* Items du module — sans répéter le nom du module */}
             {subItems.map((item: any) => {
               if (item.permission && !hasPermission(item.permission)) return null
               return (
@@ -149,21 +138,18 @@ export default function Sidebar() {
             })}
           </>
         ) : (
-          <>
-            <div className="flex items-center gap-2 w-full px-2.5 py-2 mb-1 text-[11px] font-bold text-ink-faint uppercase tracking-wider">
-              <LayoutGrid size={13} />Modules
-            </div>
-            {[...user.modules].sort((a, b) => a.ordre - b.ordre).map((module) => (
-              <button key={module.code} onClick={() => navigate(MODULE_ENTRY[module.code] || `/${module.code}`)}
-                className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium text-ink-muted hover:bg-surface-100 hover:text-ink transition-all mb-0.5">
-                {MODULE_ICONS[module.code] || <Settings size={16} strokeWidth={1.75} />}
-                {module.nom}
-              </button>
-            ))}
-          </>
+          /* Sélecteur de modules — page /modules */
+          [...user.modules].sort((a, b) => a.ordre - b.ordre).map((module) => (
+            <button key={module.code} onClick={() => navigate(MODULE_ENTRY[module.code] || `/${module.code}`)}
+              className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium text-ink-muted hover:bg-surface-100 hover:text-ink transition-all mb-0.5">
+              {MODULE_ICONS[module.code] || <Settings size={16} strokeWidth={1.75} />}
+              {module.nom}
+            </button>
+          ))
         )}
       </nav>
 
+      {/* Déconnexion — bas de sidebar */}
       <div className="px-2.5 pb-3 border-t border-surface-100 pt-2.5">
         <button onClick={handleLogout}
           className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium text-ink-faint hover:bg-red-50 hover:text-red-600 transition-colors">
