@@ -208,7 +208,7 @@ export function Assurances() {
     setEditing(a)
     setValue('nom', a.nom)
     setValue('code', a.code)
-    setValue('taux_defaut', a.taux_defaut)
+    setValue('taux_defaut', parseFloat(a.taux_defaut))
     setShowForm(true)
   }
 

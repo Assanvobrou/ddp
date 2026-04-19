@@ -47,7 +47,7 @@ export default function ChangePassword() {
       <div className="p-6">
         <div className="max-w-md">
           <Card>
-            <CardHeader title="Nouveau mot de passe" emoji="🔐" />
+            <CardHeader title="Nouveau mot de passe" />
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input
                 {...register('ancien_mot_de_passe')}

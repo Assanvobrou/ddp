@@ -36,6 +36,7 @@ export interface SessionCaisse {
   ouverte_par: string
   ouverte_par_nom: string
   ouverte_le: string
+  heure_fin_prevue: string | null
   fermee_le: string | null
   montant_systeme: string
   montant_compte: string | null
@@ -57,6 +58,7 @@ export interface Patient {
   numero_dossier: string
   nom: string
   prenom: string
+  sexe: 'M' | 'F' | 'A'
   date_naissance: string | null
   age: number | null
   telephone: string

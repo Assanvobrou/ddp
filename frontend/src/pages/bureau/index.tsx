@@ -127,7 +127,7 @@ export function NouveauPatient() {
     queryFn: () => configAPI.assurances.list().then(r => r.data.data),
   })
 
-  const { register, watch, handleSubmit, formState: { errors, isSubmitting } } = useForm<PatientFormData>({
+  const { register, watch, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: { sexe: 'M', a_assurance: false },
   })

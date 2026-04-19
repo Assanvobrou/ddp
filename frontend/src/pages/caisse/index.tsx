@@ -441,6 +441,4 @@ export function Rapports() {
 // ── Aliases compatibilité router ──────────────────────────────────────────────
 export { default as PaiementsEnAttente } from './PaiementsEnAttente'
 export { default as ClotureCaisse } from './ClotureCaisse'
-export function GestionCaisse() { const C = require('./ClotureCaisse').default; return <C /> }
-export function FichesPaiement() { const P = require('./PaiementsEnAttente').default; return <P /> }
 export function DashboardRecettes() { return <Rapports /> }
