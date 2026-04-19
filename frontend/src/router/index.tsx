@@ -27,6 +27,22 @@ function ProtectedRoute({ children, permission }: { children: JSX.Element; permi
   return children
 }
 
+/** URL inconnue → redirige vers le premier module si connecté, sinon landing */
+function RedirectHome() {
+  const { isAuthenticated, isLoading, user } = useAuth()
+  if (isLoading) return null
+  if (!isAuthenticated) return <Navigate to="/" replace />
+  // Rediriger vers le premier module accessible
+  const moduleEntry: Record<string, string> = {
+    bureau_entrees: '/bureau',
+    caisse: '/caisse/paiements',
+    configuration: '/configuration/prestations',
+  }
+  const premier = user?.modules?.[0]?.code
+  const dest = (premier && moduleEntry[premier]) || '/modules'
+  return <Navigate to={dest} replace />
+}
+
 /** Redirige vers /modules si connecté, sinon affiche la Landing */
 function LandingOrApp() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -72,7 +88,7 @@ export default function AppRouter() {
         <Route path="/configuration/utilisateurs" element={<ProtectedRoute><Utilisateurs /></ProtectedRoute>} />
         <Route path="/configuration/parametres" element={<ProtectedRoute><ParametresClinique /></ProtectedRoute>} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<RedirectHome />} />
       </Routes>
     </BrowserRouter>
   )

@@ -111,6 +111,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=20, choices=ROLES,
         verbose_name="Rôle"
     )
+    role_secondaire = models.CharField(
+        max_length=20, choices=ROLES, blank=True, null=True,
+        verbose_name="Rôle secondaire (optionnel)"
+    )
     modules_autorises = models.ManyToManyField(
         Module, blank=True,
         related_name="utilisateurs",

@@ -118,7 +118,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "matricule", "nom", "prenom", "role",
+            "matricule", "nom", "prenom", "role", "role_secondaire",
             "telephone", "telephone2", "ville", "quartier",
             "date_naissance", "situation_matrimoniale",
             "mot_de_passe", "modules_ids",
