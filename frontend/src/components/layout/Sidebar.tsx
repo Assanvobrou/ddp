@@ -1,7 +1,7 @@
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import {
   Banknote, Settings, LayoutGrid, LogOut,
-  Receipt, Stethoscope, Users,
+  Receipt, Stethoscope, Users, Building2,
   Shield, UserCog, SlidersHorizontal, ChevronLeft,
   Lock, Unlock, DoorOpen, ClipboardList,
   CheckSquare, FileText, TrendingUp, ArrowLeftRight
