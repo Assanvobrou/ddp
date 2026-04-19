@@ -59,17 +59,18 @@ class Command(BaseCommand):
             status = "✅ Créé" if created else "⏭  Existe"
             self.stdout.write(f"  {status} — Permission : {perm.code}")
 
-        # Super admin
-        admin, created = User.objects.get_or_create(
-            email="admin@ddp.ci",
-            defaults={"nom": "Admin", "prenom": "Super", "is_superuser": True, "is_staff": True}
-        )
-        admin.set_password("Admin@DDP2026!")
-        admin.mot_de_passe_provisoire = False
-        admin.is_superuser = True
-        admin.is_staff = True
-        admin.save()
-        status = "✅ Créé" if created else "🔄 Mot de passe réinitialisé"
-        self.stdout.write(f"\n{status} — Super admin : admin@ddp.ci / Admin@DDP2026!")
+        # Super admin de démonstration
+        if not User.objects.filter(email="admin@ddp.ci").exists():
+            admin = User.objects.create_superuser(
+                email="admin@ddp.ci",
+                password="Admin@DDP2026!",
+                nom="Admin",
+                prenom="Super",
+            )
+            admin.mot_de_passe_provisoire = True
+            admin.save()
+            self.stdout.write("\n✅ Super admin créé : admin@ddp.ci / Admin@DDP2026!")
+        else:
+            self.stdout.write("\n⏭  Super admin existe déjà.")
 
         self.stdout.write(self.style.SUCCESS("\n🎉 Initialisation terminée !"))
