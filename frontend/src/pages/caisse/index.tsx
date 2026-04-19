@@ -9,7 +9,8 @@ import {
   TrendingUp, BarChart2, CheckSquare,
   Shield, Clock, ArrowLeftRight, AlertTriangle
 } from 'lucide-react'
-import { caisseAPI } from '@/services/api'
+import { caisseAPI, authAPI } from '@/services/api'
+import { useAuth } from '@/context/AuthContext'
 import TicketRecu from '@/components/TicketRecu'
 import { AppLayout, Topbar } from '@/components/layout/AppLayout'
 import {
@@ -359,7 +360,7 @@ export function Rapports() {
 
   const { data: users = [] } = useQuery({
     queryKey: ['personnel-rapports'],
-    queryFn: () => authAPI.users.list().then(r => r.data.data),
+    queryFn: () => authAPI.users.list().then((r: any) => r.data.data),
     enabled: isDirectrice,
   })
   const caissiers = (users as any[]).filter((u: any) =>
