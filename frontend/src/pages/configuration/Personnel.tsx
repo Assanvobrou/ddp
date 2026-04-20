@@ -139,7 +139,11 @@ function ModalCreation({ open, onClose }: { open: boolean; onClose: () => void }
   const [prenom, setPrenom] = useState('')
   const [nom, setNom] = useState('')
   const [role, setRole] = useState('')
-  const [roleSecondaire, setRoleSecondaire] = useState('')
+  const [rolesSupp, setRolesSupp] = useState<string[]>([])
+
+  const toggleRoleSupp = (r: string) => setRolesSupp(prev =>
+    prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r]
+  )
   const [telephone, setTelephone] = useState('')
   const [telephone2, setTelephone2] = useState('')
   const [ville, setVille] = useState('')
@@ -155,7 +159,7 @@ function ModalCreation({ open, onClose }: { open: boolean; onClose: () => void }
 
   const reset = () => {
     setStep(1); setErrors({})
-    setPrenom(''); setNom(''); setRole(''); setRoleSecondaire(''); setTelephone(''); setTelephone2('')
+    setPrenom(''); setNom(''); setRole(''); setRolesSupp([]); setTelephone(''); setTelephone2('')
     setVille(''); setQuartier(''); setDateNaissance(''); setSituation('')
     setMatricule(''); setMatriculeStatus('idle'); setPassword('')
   }
@@ -216,7 +220,7 @@ function ModalCreation({ open, onClose }: { open: boolean; onClose: () => void }
         prenom, nom, role,
         matricule: matricule.toLowerCase().trim(),
         mot_de_passe: password,
-        role_secondaire: roleSecondaire || null,
+        roles_supplementaires: rolesSupp,
         telephone, telephone2, ville, quartier,
         date_naissance: dateNaissance || null,
         situation_matrimoniale: situation,
@@ -318,15 +322,25 @@ function ModalCreation({ open, onClose }: { open: boolean; onClose: () => void }
                   options={SITUATIONS} placeholder="Sélectionner..." />
               </Field>
 
-            <Field label="Rôle secondaire (optionnel)">
-              <select value={roleSecondaire} onChange={e => setRoleSecondaire(e.target.value)}
-                className="h-11 px-3 bg-surface-50 border border-surface-200 rounded-xl text-sm outline-none focus:border-primary-600">
-                <option value="">Aucun rôle secondaire</option>
+            <Field label="Rôles supplémentaires (optionnel)">
+              <div className="space-y-2">
                 {ROLES.filter(r => r.value !== role).map(r => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
+                  <label key={r.value}
+                    className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all
+                      ${rolesSupp.includes(r.value) ? 'bg-primary-50 border-primary-200' : 'bg-surface-50 border-surface-200 hover:border-surface-300'}`}
+                    onClick={() => toggleRoleSupp(r.value)}>
+                    <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all
+                      ${rolesSupp.includes(r.value) ? 'bg-primary-600 border-primary-600' : 'border-surface-300'}`}>
+                      {rolesSupp.includes(r.value) && <CheckCircle size={12} className="text-white" strokeWidth={2.5} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm text-ink">{r.label}</div>
+                      <div className="text-xs text-ink-faint truncate">{r.desc}</div>
+                    </div>
+                  </label>
                 ))}
-              </select>
-              <p className="text-xs text-ink-faint">Ex : Directrice + Comptable cumule les droits des deux rôles.</p>
+              </div>
+              <p className="text-xs text-ink-faint mt-1">Les droits de chaque rôle sélectionné sont cumulés.</p>
             </Field>
             </div>
 
@@ -499,7 +513,14 @@ export function PersonnelList() {
                         </div>
                       </td>
                       <td className="px-5 py-3.5"><code className="text-xs bg-surface-100 text-primary-700 px-2 py-0.5 rounded font-bold">{u.matricule||'—'}</code></td>
-                      <td className="px-5 py-3.5"><Badge variant={ROLE_COLORS[u.role]||'neutral'}>{u.role_display}</Badge></td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant={ROLE_COLORS[u.role]||'neutral'}>{u.role_display}</Badge>
+                          {(u.tous_roles_display || []).slice(1).map((r: string) => (
+                            <Badge key={r} variant="neutral">{r}</Badge>
+                          ))}
+                        </div>
+                      </td>
                       <td className="px-5 py-3.5">
                         <div className="flex gap-1 flex-wrap">
                           {u.modules?.map((m: any) => (
@@ -571,7 +592,19 @@ export function Utilisateurs() {
                         </div>
                       </td>
                       <td className="px-5 py-3.5"><code className="text-xs bg-surface-100 text-primary-700 px-2 py-0.5 rounded font-bold">{u.matricule||'—'}</code></td>
-                      <td className="px-5 py-3.5"><Badge variant={ROLE_COLORS[u.role]||'neutral'}>{u.role_display}</Badge></td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex flex-wrap gap-1">
+                        <div className="flex flex-wrap gap-1">
+                          <Badge variant={ROLE_COLORS[u.role]||'neutral'}>{u.role_display}</Badge>
+                          {(u.tous_roles_display || []).slice(1).map((r: string) => (
+                            <Badge key={r} variant="neutral">{r}</Badge>
+                          ))}
+                        </div>
+                          {(u.tous_roles_display || []).slice(1).map((r: string) => (
+                            <Badge key={r} variant="neutral">{r}</Badge>
+                          ))}
+                        </div>
+                      </td>
                       <td className="px-5 py-3.5"><Badge variant={u.is_active?'success':'error'}>{u.is_active?'Actif':'Inactif'}</Badge></td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-2 text-xs text-ink-faint">

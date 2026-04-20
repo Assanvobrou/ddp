@@ -74,7 +74,7 @@ class UserMeSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "id", "email", "matricule", "nom", "prenom",
-            "role", "role_display", "mot_de_passe_provisoire",
+            "role", "role_display", "tous_roles_display", "mot_de_passe_provisoire",
             "modules", "permissions",
         ]
 
@@ -118,7 +118,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            "matricule", "nom", "prenom", "role", "role_secondaire",
+            "matricule", "nom", "prenom", "role", "roles_supplementaires",
             "telephone", "telephone2", "ville", "quartier",
             "date_naissance", "situation_matrimoniale",
             "mot_de_passe", "modules_ids",

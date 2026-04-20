@@ -81,9 +81,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     SUPER_ADMIN = "super_admin"
 
     ROLES = [
-        (CAISSIERE, "Caissière"),
-        (COMPTABLE, "Comptable"),
-        (DIRECTRICE, "Directrice"),
+        (CAISSIERE,   "Caissière"),
+        (COMPTABLE,   "Comptable"),
+        (DIRECTRICE,  "Directrice"),
         (SUPER_ADMIN, "Super Administrateur"),
     ]
 
@@ -111,9 +111,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=20, choices=ROLES,
         verbose_name="Rôle"
     )
-    role_secondaire = models.CharField(
-        max_length=20, choices=ROLES, blank=True, null=True,
-        verbose_name="Rôle secondaire (optionnel)"
+    roles_supplementaires = models.JSONField(
+        default=list, blank=True,
+        verbose_name="Rôles supplémentaires"
     )
     modules_autorises = models.ManyToManyField(
         Module, blank=True,
@@ -148,6 +148,21 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f"{self.prenom} {self.nom} ({self.get_role_display()})"
+
+    @property
+    def tous_roles(self) -> list:
+        """Retourne la liste complète des rôles : [role] + roles_supplementaires."""
+        roles = [self.role]
+        for r in (self.roles_supplementaires or []):
+            if r and r not in roles:
+                roles.append(r)
+        return roles
+
+    @property
+    def tous_roles_display(self) -> list:
+        """Labels lisibles de tous les rôles."""
+        role_labels = dict(self.ROLES)
+        return [role_labels.get(r, r) for r in self.tous_roles]
 
     @property
     def nom_complet(self):

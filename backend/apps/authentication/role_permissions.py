@@ -1,36 +1,22 @@
 """
 Matrice de permissions par rôle — source de vérité unique.
-
-Nomenclature : module.action_objet
-- bureau.  = bureau des entrées
-- caisse.  = module caisse
-- config.  = configuration clinique
-
-Pour ajouter une permission à un rôle :
-1. Ajouter le code ici dans le bon rôle
-2. Créer la permission en base via populate_ddp_data ou migration
-3. La référencer dans core/permissions.py
+Un utilisateur peut cumuler plusieurs rôles via roles_supplementaires.
+assigner_role() fusionne les permissions de TOUS ses rôles.
 """
 
-# Liste complète de toutes les permissions existantes
 ALL_PERMISSIONS = [
-    # Bureau des entrées
-    {"code": "bureau.enregistrer_patient",  "nom": "Enregistrer un patient"},
-    {"code": "bureau.creer_fiche_paiement", "nom": "Créer une fiche de paiement"},
-    # Caisse — tous les rôles caisse
-    {"code": "caisse.ouvrir_fermer_session","nom": "Ouvrir et fermer la caisse"},
-    {"code": "caisse.valider_paiement",     "nom": "Valider un paiement patient"},
-    # Caisse — responsables seulement
-    {"code": "caisse.voir_rapports",        "nom": "Voir les rapports et recettes"},
-    {"code": "caisse.valider_versement",    "nom": "Valider le versement d'une caissière"},
-    # Configuration — directrice seulement
-    {"code": "config.gerer_prestations",   "nom": "Gérer les prestations médicales"},
-    {"code": "config.gerer_assurances",    "nom": "Gérer les assurances"},
-    {"code": "config.gerer_personnel",     "nom": "Gérer le personnel et les rôles"},
-    {"code": "config.gerer_parametres",    "nom": "Gérer les paramètres de la clinique"},
+    {"code": "bureau.enregistrer_patient",   "nom": "Enregistrer un patient"},
+    {"code": "bureau.creer_fiche_paiement",  "nom": "Créer une fiche de paiement"},
+    {"code": "caisse.ouvrir_fermer_session", "nom": "Ouvrir et fermer la caisse"},
+    {"code": "caisse.valider_paiement",      "nom": "Valider un paiement patient"},
+    {"code": "caisse.voir_rapports",         "nom": "Voir les rapports et recettes"},
+    {"code": "caisse.valider_versement",     "nom": "Valider le versement d'une caissière"},
+    {"code": "config.gerer_prestations",     "nom": "Gérer les prestations médicales"},
+    {"code": "config.gerer_assurances",      "nom": "Gérer les assurances"},
+    {"code": "config.gerer_personnel",       "nom": "Gérer le personnel et les rôles"},
+    {"code": "config.gerer_parametres",      "nom": "Gérer les paramètres de la clinique"},
 ]
 
-# Matrice rôle → modules + permissions
 ROLE_MATRIX = {
     'caissiere': {
         'modules': ['bureau_entrees', 'caisse'],
@@ -72,9 +58,8 @@ ROLE_MATRIX = {
 
 def assigner_role(user, role: str, modules_supplementaires: list = None):
     """
-    Assigne automatiquement les permissions et modules selon le(s) rôle(s).
-    Si l'utilisateur a un role_secondaire, les permissions des deux rôles sont fusionnées.
-    Appelé à la création ET à chaque modification de rôle.
+    Assigne les permissions en fusionnant TOUS les rôles de l'utilisateur
+    (role principal + roles_supplementaires).
     """
     from apps.authentication.models import Module, PermissionGranulaire
 
@@ -83,20 +68,26 @@ def assigner_role(user, role: str, modules_supplementaires: list = None):
         user.permissions_granulaires.set(PermissionGranulaire.objects.all())
         return
 
-    profil = ROLE_MATRIX.get(role, {})
-    role_secondaire = getattr(user, 'role_secondaire', None)
-    profil2 = ROLE_MATRIX.get(role_secondaire, {}) if role_secondaire else {}
+    tous_roles = [role]
+    for r in (getattr(user, 'roles_supplementaires', None) or []):
+        if r and r not in tous_roles:
+            tous_roles.append(r)
 
-    # Fusion des modules
-    codes_modules = list(set(profil.get('modules', []) + profil2.get('modules', [])))
+    codes_modules = []
+    codes_perms = []
+    for r in tous_roles:
+        profil = ROLE_MATRIX.get(r, {})
+        for m in profil.get('modules', []):
+            if m not in codes_modules:
+                codes_modules.append(m)
+        for p in profil.get('permissions', []):
+            if p not in codes_perms:
+                codes_perms.append(p)
+
     if modules_supplementaires:
-        codes_modules += [m for m in modules_supplementaires if m not in codes_modules]
+        for m in modules_supplementaires:
+            if m not in codes_modules:
+                codes_modules.append(m)
 
-    # Fusion des permissions
-    codes_perms = list(set(profil.get('permissions', []) + profil2.get('permissions', [])))
-
-    modules = Module.objects.filter(code__in=codes_modules, actif=True)
-    user.modules_autorises.set(modules)
-
-    perms = PermissionGranulaire.objects.filter(code__in=codes_perms)
-    user.permissions_granulaires.set(perms)
+    user.modules_autorises.set(Module.objects.filter(code__in=codes_modules, actif=True))
+    user.permissions_granulaires.set(PermissionGranulaire.objects.filter(code__in=codes_perms))
