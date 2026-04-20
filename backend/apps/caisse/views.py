@@ -382,48 +382,44 @@ class DashboardRecettesView(APIView):
     permission_classes = [permissions.IsAuthenticated, CanVoirDashboardRecettes]
 
     def get(self, request):
-        # Filtres
-        date_debut = request.query_params.get("date_debut")
-        date_fin = request.query_params.get("date_fin")
-        prestation_id = request.query_params.get("prestation")
+        date_debut   = request.query_params.get("date_debut")
+        date_fin     = request.query_params.get("date_fin")
         caissiere_id = request.query_params.get("caissiere")
 
-        qs = FichePaiement.objects.select_related("prestation", "session", "creee_par")
+        # Seules les fiches encaissées comptent dans les recettes
+        qs = FichePaiement.objects.select_related(
+            "prestation", "session", "session__ouverte_par", "creee_par"
+        ).filter(statut__in=[FichePaiement.PAYE, FichePaiement.ASSURANCE])
 
         if date_debut:
             qs = qs.filter(date_creation__date__gte=date_debut)
         if date_fin:
             qs = qs.filter(date_creation__date__lte=date_fin)
-        if prestation_id:
-            qs = qs.filter(prestation__id=prestation_id)
-        if caissiere_id:
-            qs = qs.filter(creee_par__id=caissiere_id)
 
-        # Agrégats globaux
+        # Filtre caissière : fiches dans LA SESSION de cette caissière
+        if caissiere_id:
+            qs = qs.filter(session__ouverte_par__id=caissiere_id)
+
+        # Agrégats — coalesce None → "0"
+        def s(v):
+            return str(v) if v is not None else "0"
+
         totaux = qs.aggregate(
-            total_recettes=Sum("montant_total") or Decimal("0"),
-            total_patient=Sum("montant_patient") or Decimal("0"),
-            total_assurance=Sum("montant_assurance") or Decimal("0"),
+            total_recettes=Sum("montant_total"),
+            total_patient=Sum("montant_patient"),
+            total_assurance=Sum("montant_assurance"),
             nb_fiches=Count("id"),
         )
 
         # Par prestation
         par_prestation = list(
-            qs.values(
-                nom_prestation=F("prestation__nom"),
-            ).annotate(
+            qs.values(nom_prestation=F("prestation__nom"))
+            .annotate(
                 nb=Count("id"),
                 total=Sum("montant_total"),
                 total_patient=Sum("montant_patient"),
                 total_assurance=Sum("montant_assurance"),
             ).order_by("-total")
-        )
-
-        # Par jour
-        par_jour = list(
-            qs.values(jour=F("date_creation__date"))
-            .annotate(total=Sum("montant_patient"), nb=Count("id"))
-            .order_by("jour")
         )
 
         # Sessions sur la période
@@ -438,14 +434,13 @@ class DashboardRecettesView(APIView):
         return Response({
             "success": True,
             "data": {
-                **{k: str(v) if v else "0" for k, v in totaux.items()},
-                "nb_patients": Patient.objects.filter(
-                    session__fiches_paiement__in=qs
-                ).distinct().count(),
-                "par_prestation": par_prestation,
-                "par_jour": par_jour,
+                "total_recettes":  s(totaux["total_recettes"]),
+                "total_patient":   s(totaux["total_patient"]),
+                "total_assurance": s(totaux["total_assurance"]),
+                "nb_fiches":       totaux["nb_fiches"],
+                "par_prestation":  par_prestation,
                 "sessions": SessionCaisseSerializer(
-                    sessions_qs.order_by("-date_session")[:30], many=True
+                    sessions_qs.order_by("-date_session")[:50], many=True
                 ).data,
             }
         })

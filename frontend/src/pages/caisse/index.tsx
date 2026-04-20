@@ -442,7 +442,7 @@ export function Rapports() {
               <StatCard icon={<TrendingUp size={16} strokeWidth={1.75} />} label="Recettes totales" value={fmt(Number(data.total_recettes) || 0)} color="primary" />
               <StatCard icon={<CheckCircle size={16} strokeWidth={1.75} />} label="Part patients" value={fmt(Number(data.total_patient) || 0)} color="success" />
               <StatCard icon={<Shield size={16} strokeWidth={1.75} />} label="Part assurances" value={fmt(Number(data.total_assurance) || 0)} color="warning" />
-              <StatCard icon={<Receipt size={16} strokeWidth={1.75} />} label="Actes" value={data.nb_fiches || 0} color="primary" />
+              <StatCard icon={<Receipt size={16} strokeWidth={1.75} />} label="Actes facturés" value={data.nb_fiches || 0} color="primary" />
             </div>
 
             {/* Par prestation */}
