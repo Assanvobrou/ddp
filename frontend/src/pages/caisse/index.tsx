@@ -353,10 +353,20 @@ function printRapport(data: any, mois: string) {
 // PAGE 5 : Rapports
 // ══════════════════════════════════════════════════════════════════════════════
 export function Rapports() {
-  const { hasPermission, user } = useAuth()
+  const { hasPermission } = useAuth()
   const isDirectrice = hasPermission('config.gerer_personnel')
-  const [moisFiltre, setMoisFiltre] = useState(format(new Date(), 'yyyy-MM'))
+  const qc = useQueryClient()
+
+  // Filtre par défaut : mois courant
+  const today = new Date()
+  const firstDay = format(new Date(today.getFullYear(), today.getMonth(), 1), 'yyyy-MM-dd')
+  const lastDayOfMonth = format(new Date(today.getFullYear(), today.getMonth() + 1, 0), 'yyyy-MM-dd')
+
+  const [dateDebut, setDateDebut] = useState(firstDay)
+  const [dateFin, setDateFin] = useState(lastDayOfMonth)
   const [caissiereFiltre, setCaissiereFiltre] = useState('')
+  // Paramètres appliqués — ne changent qu'en cliquant Appliquer
+  const [appliques, setAppliques] = useState({ dateDebut: firstDay, dateFin: lastDayOfMonth, caissiere: '' })
 
   const { data: users = [] } = useQuery({
     queryKey: ['personnel-rapports'],
@@ -368,37 +378,47 @@ export function Rapports() {
   )
 
   const { data, isLoading } = useQuery({
-    queryKey: ['rapports', moisFiltre, caissiereFiltre],
+    queryKey: ['rapports', appliques],
     queryFn: () => {
-      const [y, m] = moisFiltre.split('-').map(Number)
-      const lastDay = new Date(y, m, 0).getDate()
       const params: Record<string, string> = {
-        date_debut: moisFiltre + '-01',
-        date_fin: `${moisFiltre}-${String(lastDay).padStart(2,'0')}`,
+        date_debut: appliques.dateDebut,
+        date_fin: appliques.dateFin,
       }
-      if (caissiereFiltre) params.caissiere = caissiereFiltre
-      return caisseAPI.dashboard(params).then(r => r.data.data)
+      if (appliques.caissiere) params.caissiere = appliques.caissiere
+      return caisseAPI.dashboard(params).then((r: any) => r.data.data)
     },
   })
+
+  const appliquer = () => setAppliques({ dateDebut, dateFin, caissiere: caissiereFiltre })
+
+  const labelPeriode = `${format(new Date(appliques.dateDebut), 'dd/MM/yyyy')} → ${format(new Date(appliques.dateFin), 'dd/MM/yyyy')}`
+
   return (
     <AppLayout>
-      <Topbar title="Rapports" subtitle="Analyse financière mensuelle"
+      <Topbar title="Rapports" subtitle={labelPeriode}
         actions={
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => exportExcel(data, moisFiltre)}>
+            <Button size="sm" variant="secondary" onClick={() => exportExcel(data, appliques.dateDebut.slice(0,7))} disabled={!data}>
               <Download size={14} strokeWidth={1.75} />Exporter Excel
             </Button>
-            <Button size="sm" variant="secondary" onClick={() => printRapport(data, moisFiltre)}>
+            <Button size="sm" variant="secondary" onClick={() => printRapport(data, appliques.dateDebut.slice(0,7))} disabled={!data}>
               <Printer size={14} strokeWidth={1.75} />Imprimer
             </Button>
           </div>
         } />
       <div className="p-6 space-y-5">
+
+        {/* ── Filtres ── */}
         <Card>
           <div className="flex items-end gap-3 flex-wrap">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-ink-muted">Mois</label>
-              <input type="month" value={moisFiltre} onChange={e => setMoisFiltre(e.target.value)}
+              <label className="text-xs font-semibold text-ink-muted">Date début</label>
+              <input type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)}
+                className="h-11 px-3 bg-surface-50 border border-surface-200 rounded-xl text-sm outline-none focus:border-primary-600" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-ink-muted">Date fin</label>
+              <input type="date" value={dateFin} onChange={e => setDateFin(e.target.value)}
                 className="h-11 px-3 bg-surface-50 border border-surface-200 rounded-xl text-sm outline-none focus:border-primary-600" />
             </div>
             {isDirectrice && caissiers.length > 0 && (
@@ -413,55 +433,82 @@ export function Rapports() {
                 </select>
               </div>
             )}
+            <Button onClick={appliquer} size="sm" className="self-end">
+              <CheckCircle size={14} strokeWidth={1.75} />Appliquer
+            </Button>
           </div>
         </Card>
-        {isLoading ? <div className="flex justify-center py-8"><Spinner size={28} /></div>
-        : data && (
+
+        {/* ── Résultats ── */}
+        {isLoading ? (
+          <div className="flex justify-center py-12"><Spinner size={28} /></div>
+        ) : !data ? (
+          <div className="flex justify-center py-12 text-ink-faint text-sm">Aucune donnée disponible</div>
+        ) : (
           <>
+            {/* Totaux */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard icon={<TrendingUp size={16} strokeWidth={1.75} />} label="Recettes totales" value={fmt(data.total_recettes || 0)} color="primary" />
-              <StatCard icon={<CheckCircle size={16} strokeWidth={1.75} />} label="Part patients" value={fmt(data.total_patient || 0)} color="success" />
-              <StatCard icon={<Shield size={16} strokeWidth={1.75} />} label="Part assurances" value={fmt(data.total_assurance || 0)} color="warning" />
-              <StatCard icon={<Receipt size={16} strokeWidth={1.75} />} label="Patients" value={data.nb_patients || 0} color="primary" />
+              <StatCard icon={<TrendingUp size={16} strokeWidth={1.75} />} label="Recettes totales" value={fmt(Number(data.total_recettes) || 0)} color="primary" />
+              <StatCard icon={<CheckCircle size={16} strokeWidth={1.75} />} label="Part patients" value={fmt(Number(data.total_patient) || 0)} color="success" />
+              <StatCard icon={<Shield size={16} strokeWidth={1.75} />} label="Part assurances" value={fmt(Number(data.total_assurance) || 0)} color="warning" />
+              <StatCard icon={<Receipt size={16} strokeWidth={1.75} />} label="Actes" value={data.nb_fiches || 0} color="primary" />
             </div>
-            {data.par_prestation?.length > 0 && (
-              <Card padding={false}>
-                <CardHeader title="Par prestation" icon={<BarChart2 size={16} strokeWidth={1.75} />} />
+
+            {/* Par prestation */}
+            <Card padding={false}>
+              <CardHeader title="Par prestation" icon={<BarChart2 size={16} strokeWidth={1.75} />} />
+              {!data.par_prestation?.length ? (
+                <div className="px-5 py-6 text-sm text-ink-faint">Aucune prestation sur la période.</div>
+              ) : (
                 <div className="divide-y divide-surface-50">
                   {data.par_prestation.map((p: any) => (
                     <div key={p.nom_prestation} className="flex items-center gap-4 px-5 py-3.5">
-                      <div className="flex-1"><div className="font-bold text-sm text-ink">{p.nom_prestation}</div><div className="text-xs text-ink-faint">{p.nb} acte(s)</div></div>
-                      <div className="text-right"><div className="font-black text-sm">{fmt(p.total)}</div><div className="text-xs text-ink-faint">Patient : {fmt(p.total_patient)}</div></div>
+                      <div className="flex-1">
+                        <div className="font-bold text-sm text-ink">{p.nom_prestation}</div>
+                        <div className="text-xs text-ink-faint">{p.nb} acte(s)</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-black text-sm">{fmt(Number(p.total))}</div>
+                        <div className="text-xs text-ink-faint">Patient : {fmt(Number(p.total_patient))}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </Card>
-            )}
-            {data.sessions?.length > 0 && (
-              <Card padding={false}>
-                <CardHeader title="Sessions du mois" icon={<ArrowLeftRight size={16} strokeWidth={1.75} />} />
+              )}
+            </Card>
+
+            {/* Sessions */}
+            <Card padding={false}>
+              <CardHeader title="Sessions sur la période" icon={<ArrowLeftRight size={16} strokeWidth={1.75} />} />
+              {!data.sessions?.length ? (
+                <div className="px-5 py-6 text-sm text-ink-faint">Aucune session sur la période.</div>
+              ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-surface-50 border-b border-surface-100">
-                      <tr>{['Date','Caissière','Système','Soumis','Statut'].map((h,i) => (
+                      <tr>{['Date','Caissière','Recettes système','Montant soumis','Statut'].map((h,i) => (
                         <th key={i} className="px-5 py-3 text-left text-[10.5px] font-bold text-ink-faint uppercase tracking-wide">{h}</th>
                       ))}</tr>
                     </thead>
                     <tbody>
                       {data.sessions.map((s: any) => (
-                        <tr key={s.id} className="border-b border-surface-50">
+                        <tr key={s.id} className="border-b border-surface-50 hover:bg-surface-50">
                           <td className="px-5 py-3.5 font-semibold">{s.date_session}</td>
                           <td className="px-5 py-3.5">{s.ouverte_par_nom}</td>
-                          <td className="px-5 py-3.5 font-bold">{fmt(s.montant_systeme)}</td>
-                          <td className="px-5 py-3.5">{s.montant_compte ? fmt(s.montant_compte) : '—'}</td>
-                          <td className="px-5 py-3.5"><Badge variant={s.statut==='validee'?'success':s.statut==='en_attente'?'warning':'neutral'}>{s.statut_display}</Badge></td>
+                          <td className="px-5 py-3.5 font-bold text-primary-700">{fmt(Number(s.montant_systeme))}</td>
+                          <td className="px-5 py-3.5">{s.montant_compte ? fmt(Number(s.montant_compte)) : '—'}</td>
+                          <td className="px-5 py-3.5">
+                            <Badge variant={s.statut==='validee'?'success':s.statut==='en_attente'?'warning':'neutral'}>
+                              {s.statut_display}
+                            </Badge>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
-              </Card>
-            )}
+              )}
+            </Card>
           </>
         )}
       </div>
