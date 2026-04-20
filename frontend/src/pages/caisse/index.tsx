@@ -355,18 +355,15 @@ function printRapport(data: any, mois: string) {
 export function Rapports() {
   const { hasPermission } = useAuth()
   const isDirectrice = hasPermission('config.gerer_personnel')
-  const qc = useQueryClient()
 
-  // Filtre par défaut : mois courant
   const today = new Date()
-  const firstDay = format(new Date(today.getFullYear(), today.getMonth(), 1), 'yyyy-MM-dd')
-  const lastDayOfMonth = format(new Date(today.getFullYear(), today.getMonth() + 1, 0), 'yyyy-MM-dd')
-
-  const [dateDebut, setDateDebut] = useState(firstDay)
-  const [dateFin, setDateFin] = useState(lastDayOfMonth)
+  const [dateDebut, setDateDebut] = useState(
+    format(new Date(today.getFullYear(), today.getMonth(), 1), 'yyyy-MM-dd')
+  )
+  const [dateFin, setDateFin] = useState(
+    format(new Date(today.getFullYear(), today.getMonth() + 1, 0), 'yyyy-MM-dd')
+  )
   const [caissiereFiltre, setCaissiereFiltre] = useState('')
-  // Paramètres appliqués — ne changent qu'en cliquant Appliquer
-  const [appliques, setAppliques] = useState({ dateDebut: firstDay, dateFin: lastDayOfMonth, caissiere: '' })
 
   const { data: users = [] } = useQuery({
     queryKey: ['personnel-rapports'],
@@ -378,37 +375,34 @@ export function Rapports() {
   )
 
   const { data, isLoading } = useQuery({
-    queryKey: ['rapports', appliques],
-    queryFn: () => {
-      const params: Record<string, string> = {
-        date_debut: appliques.dateDebut,
-        date_fin: appliques.dateFin,
-      }
-      if (appliques.caissiere) params.caissiere = appliques.caissiere
-      return caisseAPI.dashboard(params).then((r: any) => r.data.data)
+    queryKey: ['rapports', dateDebut, dateFin, caissiereFiltre],
+    queryFn: async () => {
+      const params: Record<string, string> = { date_debut: dateDebut, date_fin: dateFin }
+      if (caissiereFiltre) params.caissiere = caissiereFiltre
+      const r: any = await caisseAPI.dashboard(params)
+      return r.data.data
     },
+    enabled: !!dateDebut && !!dateFin,
   })
 
-  const appliquer = () => setAppliques({ dateDebut, dateFin, caissiere: caissiereFiltre })
-
-  const labelPeriode = `${format(new Date(appliques.dateDebut), 'dd/MM/yyyy')} → ${format(new Date(appliques.dateFin), 'dd/MM/yyyy')}`
+  const labelPeriode = `${format(new Date(dateDebut), 'dd/MM/yyyy')} → ${format(new Date(dateFin), 'dd/MM/yyyy')}`
 
   return (
     <AppLayout>
       <Topbar title="Rapports" subtitle={labelPeriode}
         actions={
           <div className="flex gap-2">
-            <Button size="sm" variant="secondary" onClick={() => exportExcel(data, appliques.dateDebut.slice(0,7))} disabled={!data}>
+            <Button size="sm" variant="secondary" onClick={() => exportExcel(data, dateDebut.slice(0,7))} disabled={!data}>
               <Download size={14} strokeWidth={1.75} />Exporter Excel
             </Button>
-            <Button size="sm" variant="secondary" onClick={() => printRapport(data, appliques.dateDebut.slice(0,7))} disabled={!data}>
+            <Button size="sm" variant="secondary" onClick={() => printRapport(data, dateDebut.slice(0,7))} disabled={!data}>
               <Printer size={14} strokeWidth={1.75} />Imprimer
             </Button>
           </div>
         } />
       <div className="p-6 space-y-5">
 
-        {/* ── Filtres ── */}
+        {/* ── Filtres — auto-refresh à chaque changement ── */}
         <Card>
           <div className="flex items-end gap-3 flex-wrap">
             <div className="flex flex-col gap-1.5">
@@ -433,9 +427,6 @@ export function Rapports() {
                 </select>
               </div>
             )}
-            <Button onClick={appliquer} size="sm" className="self-end">
-              <CheckCircle size={14} strokeWidth={1.75} />Appliquer
-            </Button>
           </div>
         </Card>
 

@@ -411,7 +411,6 @@ class DashboardRecettesView(APIView):
         par_prestation = list(
             qs.values(
                 nom_prestation=F("prestation__nom"),
-                emoji_prestation=F("prestation__emoji"),
             ).annotate(
                 nb=Count("id"),
                 total=Sum("montant_total"),
