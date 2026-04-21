@@ -117,7 +117,6 @@ export default function Login() {
 
           <h2 className="text-xl font-black text-ink tracking-tight mb-1">Connexion</h2>
           <p className="text-[13px] text-ink-faint mb-7">
-            Entrez votre identifiant (ex : b.assanvo) et votre PIN.
           </p>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
