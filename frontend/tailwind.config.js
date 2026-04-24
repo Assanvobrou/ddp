@@ -5,13 +5,13 @@ export default {
     extend: {
       colors: {
         primary: {
-          50:  '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          400: '#60A5FA',
-          600: '#2563EB',
-          700: '#1D4ED8',
-          900: '#1E3A8A',
+          50:  '#FDF2F8',
+          100: '#FCE7F3',
+          200: '#FBCFE8',
+          400: '#E879A8',
+          600: '#D4739D',
+          700: '#BE5B86',
+          900: '#831843',
         },
         surface: {
           DEFAULT: '#FFFFFF',

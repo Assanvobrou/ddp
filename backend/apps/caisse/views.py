@@ -29,10 +29,25 @@ logger = logging.getLogger("apps.caisse")
 # ── SESSION CAISSE ─────────────────────────────────────────────────────────────
 
 class StatutCaisseView(APIView):
-    """GET /caisse/statut — état de la session de l'utilisateur connecté."""
+    """GET /caisse/statut — session du caissier connecté.
+    ?all=true (comptable/directrice) : toutes les sessions ouvertes du jour."""
     permission_classes = [permissions.IsAuthenticated, HasCaisseModule]
 
     def get(self, request):
+        show_all = request.query_params.get("all") == "true"
+        is_responsable = request.user.permissions_granulaires.filter(
+            code="caisse.voir_rapports"
+        ).exists()
+
+        if show_all and is_responsable:
+            sessions = SessionCaisse.objects.filter(
+                statut=SessionCaisse.OUVERTE
+            ).select_related("ouverte_par").order_by("-ouverte_le")
+            return Response({
+                "success": True,
+                "toutes_sessions": SessionCaisseSerializer(sessions, many=True).data,
+            })
+
         session = SessionCaisse.objects.filter(
             ouverte_par=request.user,
             statut=SessionCaisse.OUVERTE
@@ -87,13 +102,22 @@ class RecapitulatifFermetureView(APIView):
     permission_classes = [permissions.IsAuthenticated, HasCaisseModule]
 
     def get(self, request):
-        session = SessionCaisse.objects.filter(
-            ouverte_par=request.user,
-            statut=SessionCaisse.OUVERTE
-        ).prefetch_related(
-            "fiches_paiement__patient",
-            "fiches_paiement__prestation"
-        ).first()
+        session_id = request.query_params.get("session_id")
+        is_responsable = request.user.permissions_granulaires.filter(
+            code="caisse.voir_rapports"
+        ).exists()
+
+        if session_id and is_responsable:
+            session = SessionCaisse.objects.prefetch_related(
+                "fiches_paiement__patient", "fiches_paiement__prestation"
+            ).filter(id=session_id).first()
+        else:
+            session = SessionCaisse.objects.filter(
+                ouverte_par=request.user,
+                statut=SessionCaisse.OUVERTE
+            ).prefetch_related(
+                "fiches_paiement__patient", "fiches_paiement__prestation"
+            ).first()
 
         if not session:
             return Response(
@@ -114,10 +138,20 @@ class FermerCaisseView(APIView):
     permission_classes = [permissions.IsAuthenticated, HasCaisseModule]
 
     def post(self, request):
-        session = SessionCaisse.objects.filter(
-            ouverte_par=request.user,
-            statut=SessionCaisse.OUVERTE
-        ).first()
+        session_id = request.data.get("session_id")
+        is_responsable = request.user.permissions_granulaires.filter(
+            code="caisse.voir_rapports"
+        ).exists()
+
+        if session_id and is_responsable:
+            session = SessionCaisse.objects.filter(
+                id=session_id, statut=SessionCaisse.OUVERTE
+            ).first()
+        else:
+            session = SessionCaisse.objects.filter(
+                ouverte_par=request.user,
+                statut=SessionCaisse.OUVERTE
+            ).first()
 
         if not session:
             return Response(
