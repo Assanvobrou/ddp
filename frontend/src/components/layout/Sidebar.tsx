@@ -50,7 +50,7 @@ const MODULE_ENTRY: Record<string, string> = {
   configuration:  '/configuration/prestations',
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { user, logout, hasPermission } = useAuth()
   const { isOuverte, session } = useCaisse()
   const navigate = useNavigate()
@@ -85,14 +85,16 @@ export default function Sidebar() {
   return (
     <aside className="w-56 flex-shrink-0 bg-white flex flex-col h-screen sticky top-0 overflow-hidden border-r border-surface-200 shadow-sidebar">
 
-      {/* Logo — identité de l'app uniquement */}
+      {/* Logo */}
       <div className="px-4 py-3.5 border-b border-surface-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-white flex-shrink-0">
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain"
+            onError={(e: any) => { e.target.style.display='none'; e.target.nextElementSibling?.classList.remove('hidden') }} />
+          <div className="w-8 h-8 rounded-lg bg-primary-600 items-center justify-center text-white flex-shrink-0 hidden">
             <Stethoscope size={15} strokeWidth={2} />
           </div>
           <div className="min-w-0">
-            <div className="text-[13px] font-black text-ink truncate tracking-tight">Dossier Du Patient</div>
+            <div className="text-[13px] font-black text-ink truncate tracking-tight">Notre Clinique</div>
             <div className="text-[9px] text-ink-faint font-semibold uppercase tracking-widest">DDP</div>
           </div>
         </div>
@@ -130,6 +132,7 @@ export default function Sidebar() {
               return (
                 <NavLink key={item.path} to={item.path}
                   end={item.path === '/bureau' || item.path === '/caisse/paiements'}
+                  onClick={onNavigate}
                   className={({ isActive }) =>
                     `flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-100 mb-0.5
                     ${isActive ? 'bg-primary-600 text-white shadow-sm' : 'text-ink-muted hover:bg-surface-100 hover:text-ink'}`}>
