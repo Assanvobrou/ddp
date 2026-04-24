@@ -29,7 +29,7 @@ function Souche({ fiche, clinique }: { fiche: any; clinique: any }) {
         {/* Clinique */}
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 'bold', fontSize: '12px', textTransform: 'uppercase' }}>
-            {clinique?.nom || 'CLINIQUE DDP'}
+            {clinique?.nom || 'MATERNITÉ RAHAMA'}
           </div>
           {clinique?.email && <div style={{ color: '#555' }}>{clinique.email}</div>}
           {clinique?.telephone && <div style={{ color: '#555' }}>{clinique.telephone}</div>}

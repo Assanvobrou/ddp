@@ -95,7 +95,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </div>
           <div className="min-w-0">
             <div className="text-[13px] font-black text-ink truncate tracking-tight">Notre Clinique</div>
-            <div className="text-[9px] text-ink-faint font-semibold uppercase tracking-widest">DDP</div>
+            <div className="text-[9px] text-ink-faint font-semibold uppercase tracking-widest">DDP — Gagnoa</div>
           </div>
         </div>
       </div>

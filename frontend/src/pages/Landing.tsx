@@ -1,34 +1,29 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Stethoscope, Heart, Baby, Brain,
-  FlaskConical, Scan, Syringe, Ambulance,
+  Baby, Heart, Stethoscope, Syringe, Scan,
+  FlaskConical, ShieldCheck, Ambulance,
   Phone, Mail, MapPin, Clock, LogIn,
-  ShieldCheck, Users, CheckCircle, ChevronRight
+  Users, CheckCircle, ChevronRight
 } from 'lucide-react'
 
-const SPECIALITES = [
-  { icon: <Stethoscope size={24} strokeWidth={1.5} />, nom: 'Médecine générale', desc: 'Consultations, bilans de santé, suivi des maladies chroniques.' },
-  { icon: <Baby size={24} strokeWidth={1.5} />, nom: 'Gynécologie & Maternité', desc: 'Suivi de grossesse, accouchement, consultations gynécologiques.' },
-  { icon: <Brain size={24} strokeWidth={1.5} />, nom: 'Neurologie', desc: 'Diagnostic et prise en charge des affections du système nerveux.' },
-  { icon: <FlaskConical size={24} strokeWidth={1.5} />, nom: 'Laboratoire d\'analyses', desc: 'Analyses biologiques, sérologies, bilan sanguin complet.' },
-  { icon: <Scan size={24} strokeWidth={1.5} />, nom: 'Imagerie médicale', desc: 'Échographie, radiologie, scanner sur demande médicale.' },
-  { icon: <Syringe size={24} strokeWidth={1.5} />, nom: 'Vaccination & Prévention', desc: 'Vaccinations adultes et enfants, médecine préventive.' },
-  { icon: <Ambulance size={24} strokeWidth={1.5} />, nom: 'Urgences', desc: 'Prise en charge des urgences médicales 24h/24.' },
+const SERVICES = [
+  { icon: <Baby size={24} strokeWidth={1.5} />, nom: 'Suivi de grossesse', desc: 'Consultations prénatales, échographies, surveillance de la grossesse mois par mois.' },
+  { icon: <Heart size={24} strokeWidth={1.5} />, nom: 'Accouchement', desc: 'Accouchement assisté par des sages-femmes qualifiées, césarienne si nécessaire.' },
+  { icon: <Stethoscope size={24} strokeWidth={1.5} />, nom: 'Consultations gynécologiques', desc: 'Examens gynécologiques, dépistage, traitement des pathologies féminines.' },
+  { icon: <Scan size={24} strokeWidth={1.5} />, nom: 'Échographie obstétricale', desc: 'Échographies de datation, morphologiques et de suivi tout au long de la grossesse.' },
+  { icon: <Syringe size={24} strokeWidth={1.5} />, nom: 'Vaccination mère & enfant', desc: 'Programme de vaccination complet pour les mamans et les nouveau-nés.' },
+  { icon: <FlaskConical size={24} strokeWidth={1.5} />, nom: 'Analyses & Laboratoire', desc: 'Bilans sanguins, sérologies, analyses prénatales obligatoires.' },
+  { icon: <ShieldCheck size={24} strokeWidth={1.5} />, nom: 'Planification familiale', desc: 'Conseil et accompagnement en contraception et planification des naissances.' },
+  { icon: <Ambulance size={24} strokeWidth={1.5} />, nom: 'Urgences obstétricales', desc: 'Prise en charge des urgences maternelles et néonatales 24h/24.' },
 ]
 
 const ATOUTS = [
-  { icon: <Users size={20} strokeWidth={1.5} />, titre: 'Équipe pluridisciplinaire', desc: 'Des spécialistes expérimentés dans chaque domaine médical.' },
-  { icon: <Clock size={20} strokeWidth={1.5} />, titre: 'Disponibles 7j/7', desc: 'Urgences ouvertes en continu pour vous accompagner à tout moment.' },
-  { icon: <ShieldCheck size={20} strokeWidth={1.5} />, titre: 'Assurances acceptées', desc: 'CNPS, MUGEF, NSIA, SUNU, AXA et tous les grands organismes ivoiriens.' },
-  { icon: <CheckCircle size={20} strokeWidth={1.5} />, titre: 'Équipements modernes', desc: 'Plateau technique complet pour un diagnostic précis et rapide.' },
+  { icon: <Users size={20} strokeWidth={1.5} />, titre: 'Sages-femmes qualifiées', desc: 'Une équipe dédiée à la santé de la mère et de l\'enfant.' },
+  { icon: <Clock size={20} strokeWidth={1.5} />, titre: 'Disponibles 24h/24', desc: 'Urgences obstétricales ouvertes en continu, jour et nuit.' },
+  { icon: <ShieldCheck size={20} strokeWidth={1.5} />, titre: 'Assurances acceptées', desc: 'CNPS, MUGEF, NSIA, SUNU, AXA et tous les grands organismes.' },
+  { icon: <CheckCircle size={20} strokeWidth={1.5} />, titre: 'Cadre moderne', desc: 'Salles d\'accouchement équipées pour votre confort et votre sécurité.' },
 ]
-
-const COORDONNEES = {
-  adresse: 'Gagnoa, Sokoura 2è carrefour, mosquée croisée',
-  telephone: '07 07 78 52 74',
-  email: 'maaboritedinma@gmail.com',
-}
 
 export default function Landing() {
   const contactRef = useRef<HTMLElement>(null)
@@ -38,28 +33,22 @@ export default function Landing() {
 
       {/* NAV */}
       <header className="fixed top-0 w-full bg-white/95 backdrop-blur border-b border-gray-100 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.jpeg" alt="Logo" className="w-9 h-9 rounded-xl object-contain"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none'
-                ;(e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden')
-              }} />
-            <div className="w-9 h-9 rounded-xl bg-primary-600 items-center justify-center hidden">
-              <Stethoscope size={18} strokeWidth={1.75} className="text-white" />
-            </div>
+            <img src="/logo.png" alt="Maternité Rahama" className="h-10 w-auto"
+              onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
             <div>
-              <div className="font-black text-gray-900 text-[14px] sm:text-[15px] leading-tight">Notre Clinique</div>
-              <div className="text-[8px] sm:text-[9px] text-gray-400 font-semibold uppercase tracking-wider">Votre santé, notre priorité</div>
+              <div className="font-black text-gray-900 text-[15px] leading-tight">Maternité Rahama</div>
+              <div className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">La vie commence ici</div>
             </div>
           </div>
-          <nav className="flex items-center gap-3 sm:gap-6">
+          <nav className="flex items-center gap-4 md:gap-6">
             <button onClick={() => contactRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="hidden sm:block text-sm text-gray-500 font-medium hover:text-gray-900 transition-colors">
+              className="hidden md:block text-sm text-gray-500 font-medium hover:text-gray-900 transition-colors">
               Contact
             </button>
             <Link to="/connexion"
-              className="flex items-center gap-1.5 bg-primary-600 text-white px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold hover:bg-primary-700 transition-colors">
+              className="flex items-center gap-1.5 bg-primary-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-700 transition-colors">
               <LogIn size={14} strokeWidth={1.75} />
               <span className="hidden sm:inline">Espace personnel</span>
               <span className="sm:hidden">Connexion</span>
@@ -69,28 +58,27 @@ export default function Landing() {
       </header>
 
       {/* HERO */}
-      <section className="pt-24 sm:pt-28 pb-16 sm:pb-20 px-4 sm:px-6" style={{ background: 'linear-gradient(135deg, #FDF2F6 0%, #ffffff 60%, #FDF2F6 100%)' }}>
+      <section className="pt-28 pb-16 md:pb-20 px-4 md:px-6" style={{ background: 'linear-gradient(135deg, #FDF2F8 0%, #FFFFFF 60%, #FDF2F8 100%)' }}>
         <div className="max-w-5xl mx-auto">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white border border-primary-200 text-primary-700 text-[10px] sm:text-xs font-bold px-3 py-1.5 rounded-full mb-4 sm:mb-6 shadow-sm">
-              <Heart size={11} strokeWidth={2.5} className="text-primary-600" />
-              Centre médical — Gagnoa, Côte d'Ivoire
+            <div className="inline-flex items-center gap-2 bg-white border border-primary-200 text-primary-700 text-xs font-bold px-3 py-1.5 rounded-full mb-6 shadow-sm">
+              <Baby size={12} strokeWidth={2.5} className="text-primary-600" />
+              Maternité — Gagnoa, Côte d'Ivoire
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight mb-4 sm:mb-5">
-              Votre santé entre<br />
-              <span className="text-primary-600">les meilleures mains.</span>
+            <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight mb-5">
+              La vie commence<br />
+              <span className="text-primary-600">entre les meilleures mains.</span>
             </h1>
-            <p className="text-base sm:text-xl text-gray-500 leading-relaxed mb-8 sm:mb-10 max-w-xl">
-              Notre Clinique réunit des spécialistes expérimentés pour vous offrir des soins de qualité, dans un environnement moderne et humain.
+            <p className="text-base md:text-xl text-gray-500 leading-relaxed mb-8 md:mb-10 max-w-xl">
+              La Maternité Rahama vous accompagne de la grossesse à l'accouchement, avec une équipe de sages-femmes dévouées dans un cadre sûr et chaleureux.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-wrap gap-3">
               <button onClick={() => contactRef.current?.scrollIntoView({ behavior: 'smooth' })}
-                className="flex items-center justify-center gap-2 bg-primary-600 text-white px-6 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-700 transition-colors shadow-md">
+                className="flex items-center gap-2 bg-primary-600 text-white px-6 py-3.5 rounded-xl font-semibold text-sm hover:bg-primary-700 transition-colors shadow-md">
                 <Phone size={16} strokeWidth={1.75} />
                 Prendre rendez-vous
               </button>
-              <a href={`tel:+225${COORDONNEES.telephone.replace(/\s/g,'')}`}
-                className="flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 px-6 py-3.5 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors">
+              <a href="tel:+2250707785274" className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-6 py-3.5 rounded-xl font-semibold text-sm hover:bg-gray-50 transition-colors">
                 <ChevronRight size={16} strokeWidth={1.75} />
                 Urgences 24h/24
               </a>
@@ -100,8 +88,8 @@ export default function Landing() {
       </section>
 
       {/* ATOUTS */}
-      <section className="py-10 sm:py-12 border-y border-gray-100 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+      <section className="py-10 md:py-12 border-y border-gray-100 bg-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {ATOUTS.map((a, i) => (
             <div key={i} className="flex flex-col gap-2">
               <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center mb-1">
@@ -114,17 +102,17 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* SPÉCIALITÉS */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 bg-white">
+      {/* SERVICES */}
+      <section className="py-16 md:py-20 px-4 md:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-3">Nos spécialités</h2>
-            <p className="text-gray-500 max-w-lg text-sm sm:text-base">Une prise en charge complète pour chaque membre de votre famille.</p>
+          <div className="mb-10 md:mb-12">
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">Nos services</h2>
+            <p className="text-gray-500 max-w-lg">Un accompagnement complet pour la maman et le bébé, de la conception aux premiers jours.</p>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {SPECIALITES.map((s, i) => (
-              <div key={i} className="group flex gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all bg-white cursor-default">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {SERVICES.map((s, i) => (
+              <div key={i} className="group flex gap-4 p-4 md:p-5 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all bg-white cursor-default">
+                <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0 group-hover:bg-primary-600 group-hover:text-white transition-colors">
                   {s.icon}
                 </div>
                 <div>
@@ -138,13 +126,13 @@ export default function Landing() {
       </section>
 
       {/* ASSURANCES */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 bg-gray-50">
+      <section className="py-14 md:py-16 px-4 md:px-6 bg-gray-50">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-xl sm:text-2xl font-black text-gray-900 mb-3">Assurances partenaires</h2>
-          <p className="text-gray-500 mb-6 sm:mb-8 text-sm">Nous acceptons les principaux organismes d'assurance maladie.</p>
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+          <h2 className="text-xl md:text-2xl font-black text-gray-900 mb-3">Assurances partenaires</h2>
+          <p className="text-gray-500 mb-8 text-sm">Nous acceptons les principaux organismes d'assurance maladie en Côte d'Ivoire.</p>
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             {['CNPS', 'MUGEF-CI', 'NSIA', 'SUNU', 'AXA', 'ALLIANZ', 'ATLANTIQUE', 'SOHAM', 'COLINA', 'PRIMA'].map(a => (
-              <div key={a} className="bg-white border border-gray-200 text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold shadow-sm">
+              <div key={a} className="bg-white border border-gray-200 text-gray-700 px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-bold shadow-sm">
                 {a}
               </div>
             ))}
@@ -152,17 +140,33 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* CTA */}
+      <section className="py-16 md:py-20 px-4 md:px-6 bg-primary-700">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-5">
+            <Baby size={28} strokeWidth={1.5} className="text-white" />
+          </div>
+          <h2 className="text-2xl md:text-3xl font-black text-white mb-4">Bienvenue à la Maternité Rahama</h2>
+          <p className="text-white/80 mb-8 text-sm md:text-base">Chaque naissance est un moment unique. Notre équipe vous accompagne avec bienveillance et professionnalisme.</p>
+          <Link to="/connexion"
+            className="inline-flex items-center gap-2 bg-white text-primary-700 px-8 py-3.5 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors shadow-lg">
+            <LogIn size={16} strokeWidth={1.75} />
+            Espace personnel
+          </Link>
+        </div>
+      </section>
+
       {/* CONTACT */}
-      <section ref={contactRef} className="py-16 sm:py-20 px-4 sm:px-6 bg-white">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-8 sm:gap-12 items-start">
+      <section ref={contactRef} className="py-16 md:py-20 px-4 md:px-6 bg-white">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 md:gap-12 items-start">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-4">Nous trouver</h2>
-            <p className="text-gray-500 mb-6 sm:mb-8 leading-relaxed text-sm sm:text-base">Notre équipe est disponible pour répondre à toutes vos questions.</p>
+            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-4">Nous trouver</h2>
+            <p className="text-gray-500 mb-8 leading-relaxed">Notre équipe est disponible pour répondre à toutes vos questions et vous accueillir.</p>
             <div className="space-y-4">
               {[
-                { icon: <MapPin size={18} strokeWidth={1.75} />, label: 'Adresse', val: COORDONNEES.adresse },
-                { icon: <Phone size={18} strokeWidth={1.75} />, label: 'Téléphone', val: COORDONNEES.telephone },
-                { icon: <Mail size={18} strokeWidth={1.75} />, label: 'Email', val: COORDONNEES.email },
+                { icon: <MapPin size={18} strokeWidth={1.75} />, label: 'Adresse', val: 'Gagnoa, Sokoura 2è carrefour, mosquée croisée' },
+                { icon: <Phone size={18} strokeWidth={1.75} />, label: 'Téléphone', val: '07 07 78 52 74' },
+                { icon: <Mail size={18} strokeWidth={1.75} />, label: 'Email', val: 'maaboritedinma@gmail.com' },
                 { icon: <Clock size={18} strokeWidth={1.75} />, label: 'Urgences', val: '24h/24 · 7j/7' },
               ].map((c, i) => (
                 <div key={i} className="flex items-start gap-3">
@@ -178,29 +182,29 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 border border-gray-100">
+          <div className="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-100">
             <h3 className="font-black text-gray-900 mb-1">Prendre rendez-vous</h3>
             <p className="text-sm text-gray-500 mb-6">Remplissez ce formulaire, nous vous rappelons sous 24h.</p>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-gray-600">Prénom</label>
-                  <input className="h-11 px-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-600 bg-white" placeholder="Aminata" />
+                  <input className="h-11 px-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-500 bg-white" placeholder="Aminata" />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-semibold text-gray-600">Nom</label>
-                  <input className="h-11 px-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-600 bg-white" placeholder="KONÉ" />
+                  <input className="h-11 px-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-500 bg-white" placeholder="KONÉ" />
                 </div>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-600">Téléphone</label>
-                <input className="h-11 px-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-600 bg-white" placeholder="+225 07 XX XX XX" />
+                <input className="h-11 px-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-500 bg-white" placeholder="+225 07 XX XX XX" />
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-gray-600">Motif</label>
-                <select className="h-11 px-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-600 bg-white">
-                  <option value="">Sélectionner une spécialité</option>
-                  {SPECIALITES.map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
+                <select className="h-11 px-3 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary-500 bg-white text-gray-700">
+                  <option value="">Sélectionner un service</option>
+                  {SERVICES.map(s => <option key={s.nom} value={s.nom}>{s.nom}</option>)}
                 </select>
               </div>
               <button className="w-full bg-primary-600 text-white py-3 rounded-xl font-semibold text-sm hover:bg-primary-700 transition-colors">
@@ -212,45 +216,24 @@ export default function Landing() {
       </section>
 
       {/* FOOTER */}
-      <footer className="py-8 sm:py-10 px-4 sm:px-6 bg-gray-900">
+      <footer className="py-8 px-4 md:px-6 bg-gray-900">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
-              <img src="/logo.jpeg" alt="Logo" className="w-8 h-8 rounded-lg object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none'
-                  ;(e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden')
-                }} />
-              <div className="w-8 h-8 rounded-lg bg-primary-600 items-center justify-center hidden">
-                <Stethoscope size={14} strokeWidth={1.75} className="text-white" />
-              </div>
+              <img src="/logo.png" alt="Logo" className="h-8 w-auto brightness-0 invert"
+                onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
               <div>
-                <div className="font-black text-white text-sm">Notre Clinique</div>
-                <div className="text-xs text-gray-500">Votre santé, notre priorité</div>
+                <div className="font-black text-white text-sm">Maternité Rahama</div>
+                <div className="text-xs text-gray-500">La vie commence ici</div>
               </div>
             </div>
-            <Link to="/connexion" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white transition-colors">
-              <LogIn size={12} strokeWidth={1.75} />
-              Espace personnel
-            </Link>
-          </div>
-          {/* Coordonnées dans le footer */}
-          <div className="border-t border-gray-800 pt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-gray-500">
-            <div className="flex items-start gap-2">
-              <MapPin size={13} className="text-primary-600 flex-shrink-0 mt-0.5" />
-              <span>{COORDONNEES.adresse}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone size={13} className="text-primary-600 flex-shrink-0" />
-              <span>{COORDONNEES.telephone}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Mail size={13} className="text-primary-600 flex-shrink-0" />
-              <span>{COORDONNEES.email}</span>
+            <div className="text-xs text-gray-500 leading-relaxed md:text-right">
+              <div>Gagnoa, Sokoura 2è carrefour, mosquée croisée</div>
+              <div className="mt-0.5">Tél : 07 07 78 52 74 · maaboritedinma@gmail.com</div>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-6 pt-4 text-center text-[10px] text-gray-600">
-            © 2026 Notre Clinique · Gagnoa, Côte d'Ivoire
+          <div className="mt-6 pt-4 border-t border-gray-800 text-center text-xs text-gray-600">
+            © 2026 Maternité Rahama · Gagnoa, Côte d'Ivoire — Tous droits réservés
           </div>
         </div>
       </footer>
