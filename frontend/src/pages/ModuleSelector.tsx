@@ -45,7 +45,7 @@ export default function ModuleSelector() {
           </div>
           <div>
             <div className="text-sm font-black text-ink tracking-tight">Maternité Rahama</div>
-            <div className="text-[10px] text-ink-faint font-medium uppercase tracking-widest">DDP</div>
+            <div className="text-[10px] text-ink-faint font-medium uppercase tracking-widest">Gagnoa</div>
           </div>
         </div>
 
@@ -129,7 +129,7 @@ export default function ModuleSelector() {
 
       {/* Footer */}
       <footer className="text-center py-4 text-[11px] text-ink-faint">
-        DDP — Maternité Rahama · v1.0.0
+        Maternité Rahama · v1.0.0
       </footer>
     </div>
   )

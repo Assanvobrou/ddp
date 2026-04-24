@@ -45,7 +45,7 @@ export function PatientsList() {
       <div className="p-6 space-y-4">
         <Card>
           <Input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher par code DDP, nom, prénom ou téléphone..."
+            placeholder="Rechercher par n° dossier, nom, prénom ou téléphone..."
             leftIcon={<Search size={15} strokeWidth={1.75} />} />
         </Card>
         <Card padding={false}>
@@ -61,7 +61,7 @@ export function PatientsList() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-surface-50 border-b border-surface-100">
-                  <tr>{['Code DDP','Patient','Sexe','Age','Téléphone','Assurance','Date',''].map((h,i) => (
+                  <tr>{['N° Dossier','Patient','Sexe','Age','Téléphone','Assurance','Date',''].map((h,i) => (
                     <th key={i} className="px-5 py-3 text-left text-[10.5px] font-bold text-ink-faint uppercase tracking-wide">{h}</th>
                   ))}</tr>
                 </thead>
@@ -127,7 +127,7 @@ export function NouveauPatient() {
     queryFn: () => configAPI.assurances.list().then(r => r.data.data),
   })
 
-  const { register, watch, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<PatientFormData>({
+  const { register, watch, handleSubmit, formState: { errors, isSubmitting } } = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: { sexe: 'M', a_assurance: false },
   })
@@ -266,14 +266,14 @@ export function PatientDetail() {
 
   return (
     <AppLayout>
-      <Topbar title={`${patient.prenom} ${patient.nom}`} subtitle={`Code DDP : ${patient.numero_dossier}`}
+      <Topbar title={`${patient.prenom} ${patient.nom}`} subtitle={`N° Dossier : ${patient.numero_dossier}`}
         actions={<Button variant="ghost" size="sm" onClick={() => navigate('/bureau')}><ArrowLeft size={15} />Liste patients</Button>} />
       <div className="p-6 max-w-3xl space-y-4">
         <Card>
           <CardHeader title="Dossier patient" icon={<User size={16} strokeWidth={1.75} />} />
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
             {[
-              { icon: <FileText size={13} />, label: 'Code DDP', val: <code className="bg-primary-50 text-primary-700 px-2 py-0.5 rounded text-xs font-bold">{patient.numero_dossier}</code> },
+              { icon: <FileText size={13} />, label: 'N° Dossier', val: <code className="bg-primary-50 text-primary-700 px-2 py-0.5 rounded text-xs font-bold">{patient.numero_dossier}</code> },
               { icon: <User size={13} />, label: 'Nom complet', val: `${patient.prenom} ${patient.nom}` },
               { icon: <User size={13} />, label: 'Sexe', val: patient.sexe === 'F' ? 'Féminin' : patient.sexe === 'M' ? 'Masculin' : 'Autre' },
               { icon: <Calendar size={13} />, label: 'Age', val: patient.age ? `${patient.age} ans` : patient.date_naissance || '—' },

@@ -1,5 +1,5 @@
 /**
- * TicketRecu — Reçu de paiement DDP
+ * TicketRecu — Reçu de paiement — Maternité Rahama
  * 2 souches identiques sur A5 paysage séparées par un trait pointillé.
  * À utiliser dans une Modal. Le bouton Imprimer n'imprime QUE les souches.
  */
@@ -120,7 +120,7 @@ export default function TicketRecu({ fiche, onClose }: TicketRecuProps) {
     win.document.write(`
       <html>
       <head>
-        <title>Reçu DDP</title>
+        <title>Reçu Maternité Rahama</title>
         <style>
           @page { size: A5 landscape; margin: 6mm; }
           body { margin: 0; font-family: Arial, sans-serif; }

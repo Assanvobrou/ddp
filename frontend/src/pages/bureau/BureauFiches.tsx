@@ -36,7 +36,7 @@ export default function BureauFiches() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-surface-50 border-b border-surface-100">
-                  <tr>{['Patient','Code DDP','Prestation','Service','Montant','Assurance','Créée le'].map((h,i) => (
+                  <tr>{['Patient','N° Dossier','Prestation','Service','Montant','Assurance','Créée le'].map((h,i) => (
                     <th key={i} className="px-5 py-3 text-left text-[10.5px] font-bold text-ink-faint uppercase tracking-wide">{h}</th>
                   ))}</tr>
                 </thead>

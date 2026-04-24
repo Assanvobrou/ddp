@@ -62,7 +62,7 @@ export default function Login() {
             <Stethoscope size={22} strokeWidth={1.75} className="text-white" />
           </div>
           <div>
-            <div className="text-white text-[16px] font-black tracking-tight">Notre Clinique</div>
+            <div className="text-white text-[16px] font-black tracking-tight">Maternité Rahama</div>
             <div className="text-white/50 text-[9px] font-bold tracking-[0.9px] uppercase mt-0.5">Système de gestion clinique</div>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function Login() {
         </div>
 
         <div className="relative z-10 mt-10 pt-5 border-t border-white/10 flex items-center justify-between">
-          <span className="text-white/25 text-[10.5px] font-medium">© 2026 Notre Clinique</span>
+          <span className="text-white/25 text-[10.5px] font-medium">© 2026 Maternité Rahama</span>
           <span className="text-white/25 text-[10.5px] font-semibold tracking-wide">v1.0.0</span>
         </div>
       </div>
@@ -110,7 +110,7 @@ export default function Login() {
               <Stethoscope size={18} strokeWidth={1.75} className="text-white" />
             </div>
             <div>
-              <div className="text-ink text-[15px] font-black">Notre Clinique</div>
+              <div className="text-ink text-[15px] font-black">Maternité Rahama</div>
               <div className="text-ink-faint text-[10px] font-semibold uppercase tracking-wide">Gestion clinique</div>
             </div>
           </div>
@@ -168,7 +168,7 @@ export default function Login() {
             <ShieldCheck size={11} strokeWidth={1.75} />
             <span>Connexion sécurisée</span>
             <span className="w-1 h-1 rounded-full bg-surface-200" />
-            <span>Notre Clinique © 2026</span>
+            <span>Maternité Rahama © 2026</span>
           </div>
         </div>
       </div>

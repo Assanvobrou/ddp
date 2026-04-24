@@ -26,12 +26,12 @@ export function RecuPaiement({ fiche, onClose }: { fiche: any; onClose: () => vo
     <div className="space-y-4">
       <div id="print-ticket" className="border border-surface-200 rounded-xl p-5 text-sm print:border-none">
         <div className="text-center mb-4 pb-3 border-b border-surface-100">
-          <h2 className="text-base font-black text-ink">Dossier Du Patient — DDP</h2>
+          <h2 className="text-base font-black text-ink">Maternité Rahama</h2>
           <p className="text-xs text-ink-faint">Reçu de paiement · {format(new Date(), 'dd MMMM yyyy HH:mm', { locale: fr })}</p>
         </div>
         <div className="space-y-1.5 mb-4">
           <div className="flex justify-between"><span className="text-ink-faint">Patient</span><strong>{fiche.patient_nom}</strong></div>
-          <div className="flex justify-between"><span className="text-ink-faint">Code DDP</span><code className="text-primary-700 font-bold">{fiche.patient_code || '—'}</code></div>
+          <div className="flex justify-between"><span className="text-ink-faint">N° Dossier</span><code className="text-primary-700 font-bold">{fiche.patient_code || '—'}</code></div>
           {fiche.service_nom && <div className="flex justify-between"><span className="text-ink-faint">Service</span><span>{fiche.service_nom}</span></div>}
           <div className="flex justify-between"><span className="text-ink-faint">Prestation</span><span>{fiche.prestation_nom}</span></div>
         </div>
@@ -45,7 +45,7 @@ export function RecuPaiement({ fiche, onClose }: { fiche: any; onClose: () => vo
           </div>
         </div>
         <div className="mt-4 pt-3 border-t border-surface-100 flex justify-between text-xs text-ink-faint">
-          <span>Statut : Payé</span><span>DDP — {format(new Date(), 'dd/MM/yyyy')}</span>
+          <span>Statut : Payé</span><span>Maternité Rahama — {format(new Date(), 'dd/MM/yyyy')}</span>
         </div>
       </div>
       {/* Boutons — masqués à l'impression */}
@@ -80,7 +80,7 @@ export function PaiementsValides() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-surface-50 border-b border-surface-100">
-                  <tr>{['Patient','Code DDP','Prestation','Service','Montant','Assurance','Date',''].map((h,i) => (
+                  <tr>{['Patient','N° Dossier','Prestation','Service','Montant','Assurance','Date',''].map((h,i) => (
                     <th key={i} className="px-5 py-3 text-left text-[10.5px] font-bold text-ink-faint uppercase tracking-wide">{h}</th>
                   ))}</tr>
                 </thead>
@@ -233,7 +233,7 @@ function exportExcel(data: any, mois: string) {
   const rows: string[][] = []
 
   // En-tête
-  rows.push(['RAPPORT FINANCIER MENSUEL — DDP'])
+  rows.push(['RAPPORT FINANCIER MENSUEL — Maternité Rahama'])
   rows.push([`Période : ${mois}`])
   rows.push([`Généré le : ${new Date().toLocaleDateString('fr-FR')}`])
   rows.push([])
@@ -304,7 +304,7 @@ function printRapport(data: any, mois: string) {
     </tr>`).join('')
 
   win.document.write(`
-    <html><head><title>Rapport DDP ${mois}</title>
+    <html><head><title>Rapport Maternité Rahama ${mois}</title>
     <style>
       @page { size: A4; margin: 15mm; }
       body { font-family: Arial, sans-serif; font-size: 11px; color: #111; }
@@ -319,7 +319,7 @@ function printRapport(data: any, mois: string) {
       .stat .lbl { font-size: 9px; color: #666; text-transform: uppercase; }
       .footer { margin-top: 20px; font-size: 9px; color: #999; border-top: 1px solid #eee; padding-top: 8px; }
     </style></head><body>
-    <h1>Rapport Financier Mensuel — DDP</h1>
+    <h1>Rapport Financier Mensuel — Maternité Rahama</h1>
     <p style="color:#555;font-size:10px">Période : ${mois} · Généré le ${new Date().toLocaleDateString('fr-FR')}</p>
 
     <div class="totaux">
@@ -341,7 +341,7 @@ function printRapport(data: any, mois: string) {
       <tbody>${session_rows || '<tr><td colspan="5" style="color:#999">Aucune session</td></tr>'}</tbody>
     </table>
 
-    <div class="footer">DDP — Dossier Du Patient · Rapport confidentiel</div>
+    <div class="footer">Maternité Rahama · Rapport confidentiel</div>
     </body></html>
   `)
   win.document.close()

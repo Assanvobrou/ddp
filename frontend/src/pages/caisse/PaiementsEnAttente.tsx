@@ -85,12 +85,12 @@ function RecuPaiement({ fiche, onClose }: { fiche: any; onClose: () => void }) {
     <div className="space-y-4">
       <div className="border border-surface-200 rounded-xl p-5 text-sm">
         <div className="text-center mb-4 pb-3 border-b border-surface-100">
-          <h2 className="text-base font-black text-ink">Dossier Du Patient — DDP</h2>
+          <h2 className="text-base font-black text-ink">Maternité Rahama</h2>
           <p className="text-xs text-ink-faint">Reçu de paiement · {format(new Date(), 'dd MMMM yyyy HH:mm', { locale: fr })}</p>
         </div>
         <div className="space-y-1.5 mb-4">
           <div className="flex justify-between"><span className="text-ink-faint">Patient</span><strong>{fiche.patient_nom}</strong></div>
-          <div className="flex justify-between"><span className="text-ink-faint">Code DDP</span><code className="text-primary-700 font-bold">{fiche.patient_code || '—'}</code></div>
+          <div className="flex justify-between"><span className="text-ink-faint">N° Dossier</span><code className="text-primary-700 font-bold">{fiche.patient_code || '—'}</code></div>
           {fiche.service_nom && <div className="flex justify-between"><span className="text-ink-faint">Service</span><span className="font-medium">{fiche.service_nom}</span></div>}
           <div className="flex justify-between"><span className="text-ink-faint">Prestation</span><span className="font-medium">{fiche.prestation_nom}</span></div>
         </div>
@@ -104,7 +104,7 @@ function RecuPaiement({ fiche, onClose }: { fiche: any; onClose: () => void }) {
           </div>
         </div>
         <div className="mt-4 pt-3 border-t border-surface-100 flex justify-between text-xs text-ink-faint">
-          <span>Statut : Payé</span><span>DDP — {format(new Date(), 'dd/MM/yyyy')}</span>
+          <span>Statut : Payé</span><span>Maternité Rahama — {format(new Date(), 'dd/MM/yyyy')}</span>
         </div>
       </div>
       <div className="flex gap-2 no-print">
@@ -162,7 +162,7 @@ export default function PaiementsEnAttente() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-surface-50 border-b border-surface-100">
-                      <tr>{['Patient','Code DDP','Prestation','Service','Montant','Assurance','Date',''].map((h,i) => (
+                      <tr>{['Patient','N° Dossier','Prestation','Service','Montant','Assurance','Date',''].map((h,i) => (
                         <th key={i} className="px-5 py-3 text-left text-[10.5px] font-bold text-ink-faint uppercase tracking-wide">{h}</th>
                       ))}</tr>
                     </thead>
@@ -200,7 +200,7 @@ export default function PaiementsEnAttente() {
           <div className="space-y-4">
             <div className="bg-surface-50 rounded-xl p-4 text-sm space-y-1.5">
               <div><span className="text-ink-faint">Patient : </span><strong>{ficheToValidate.patient_nom}</strong></div>
-              <div><span className="text-ink-faint">Code DDP : </span><code className="text-primary-700 font-bold">{ficheToValidate.patient_code}</code></div>
+              <div><span className="text-ink-faint">N° Dossier : </span><code className="text-primary-700 font-bold">{ficheToValidate.patient_code}</code></div>
               <div><span className="text-ink-faint">Prestation : </span>{ficheToValidate.prestation_nom}</div>
               <div><span className="text-ink-faint">Service : </span>{ficheToValidate.service_nom || '—'}</div>
               <div className="pt-2 text-base font-black text-ink border-t border-surface-200">
