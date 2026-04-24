@@ -115,6 +115,8 @@ export const authAPI = {
 // ── Endpoints Caisse ──────────────────────────────────────────────────────────
 export const caisseAPI = {
   statut: () => api.get('/caisse/statut/'),
+  statutAll: () => api.get('/caisse/statut/', { params: { all: 'true' } }),
+  recapitulatifSession: (sessionId: string) => api.get('/caisse/recapitulatif/', { params: { session_id: sessionId } }),
   ouvrir: (data?: { heure_fin_prevue?: string }) => api.post('/caisse/ouvrir/', data || {}),
   recapitulatif: () => api.get('/caisse/recapitulatif/'),
   fermer: (data: { montant_compte: number; justificatif?: string }) =>
