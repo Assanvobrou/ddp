@@ -88,7 +88,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       {/* Logo */}
       <div className="px-4 py-3.5 border-b border-surface-100">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain"
+          <img src="/logo.jpeg" alt="Logo" className="w-8 h-8 rounded-lg object-contain"
             onError={(e: any) => { e.target.style.display='none'; e.target.nextElementSibling?.classList.remove('hidden') }} />
           <div className="w-8 h-8 rounded-lg bg-primary-600 items-center justify-center text-white flex-shrink-0 hidden">
             <Stethoscope size={15} strokeWidth={2} />
