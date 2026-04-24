@@ -35,7 +35,7 @@ export default function Landing() {
       <header className="fixed top-0 w-full bg-white/95 backdrop-blur border-b border-gray-100 z-50">
         <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="Maternité Rahama" className="h-10 w-auto"
+            <img src="/logo.jpeg" alt="Maternité Rahama" className="h-10 w-auto"
               onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
             <div>
               <div className="font-black text-gray-900 text-[15px] leading-tight">Maternité Rahama</div>
@@ -220,7 +220,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
-              <img src="/logo.png" alt="Logo" className="h-8 w-auto brightness-0 invert"
+              <img src="/logo.jpeg" alt="Logo" className="h-8 w-auto brightness-0 invert"
                 onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
               <div>
                 <div className="font-black text-white text-sm">Maternité Rahama</div>
