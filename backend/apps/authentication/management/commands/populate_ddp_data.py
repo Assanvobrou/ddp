@@ -20,10 +20,10 @@ PERMISSIONS = [
     {"code": "bureau.enregistrer_patient",   "nom": "Enregistrer un patient",        "module": "bureau_entrees"},
     {"code": "bureau.creer_fiche_paiement",  "nom": "Créer une fiche de paiement",   "module": "bureau_entrees"},
     # Caisse
-    {"code": "caisse.gerer_session_caisse",  "nom": "Ouvrir / fermer la caisse",     "module": "caisse"},
+    {"code": "caisse.ouvrir_fermer_session", "nom": "Ouvrir et fermer la caisse",     "module": "caisse"},
     {"code": "caisse.valider_paiement",      "nom": "Valider un paiement",           "module": "caisse"},
     {"code": "caisse.voir_rapports","nom": "Voir les rapports et recettes","module": "caisse"},
-    {"code": "caisse.exporter_rapport",      "nom": "Exporter les rapports",         "module": "caisse"},
+    {"code": "caisse.valider_versement",     "nom": "Valider le versement",         "module": "caisse"},
     # Configuration
     {"code": "config.gerer_prestations",    "nom": "Gérer les prestations",          "module": "configuration"},
     {"code": "config.gerer_personnel",      "nom": "Gérer le personnel",             "module": "configuration"},
