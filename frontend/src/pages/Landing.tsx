@@ -24,7 +24,7 @@ function ContactForm() {
       await contactAPI.envoyer(form)
       setSent(true)
     } catch {
-      setError('Erreur d'envoi. Appelez-nous au 07 07 78 52 74.')
+      setError('Erreur d\'envoi. Appelez-nous au 07 07 78 52 74.')
     } finally {
       setLoading(false)
     }
@@ -115,7 +115,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           {/* Logo + nom */}
           <div className="flex items-center gap-2.5">
-            <img src="/logo_2.png" alt="Maternité Rahama" className="h-9 w-9 object-contain rounded-lg"
+            <img src="/logo.png" alt="Maternité Rahama" className="h-9 w-9 object-contain rounded-lg"
               onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
             <div>
               <div className="font-black text-gray-900 text-[15px] leading-tight">Maternité Rahama</div>
@@ -145,7 +145,7 @@ export default function Landing() {
           <div className="flex justify-center order-2 md:order-1">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-primary-100/60" style={{ transform: 'scale(1.1)' }} />
-              <img src="/logo_2.png" alt="Maternité Rahama"
+              <img src="/logo.png" alt="Maternité Rahama"
                 className="relative w-64 h-64 md:w-80 md:h-80 object-contain"
                 style={{ filter: 'drop-shadow(0 8px 24px rgba(192,98,142,0.25))' }}
                 onError={(e) => {
@@ -202,7 +202,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           {/* Logo au-dessus du fond coloré */}
           <div className="rounded-2xl overflow-hidden shadow-lg bg-primary-100 aspect-video relative flex items-center justify-center">
-            <img src="/logo_2.png" alt="Maternité Rahama"
+            <img src="/logo.png" alt="Maternité Rahama"
               className="relative z-10 w-48 h-48 object-contain"
               style={{ filter: 'drop-shadow(0 4px 16px rgba(192,98,142,0.3))' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
@@ -310,7 +310,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2.5">
-              <img src="/logo_2.png" alt="Logo" className="h-9 w-9 object-contain rounded-lg brightness-0 invert"
+              <img src="/logo.png" alt="Logo" className="h-9 w-9 object-contain rounded-lg brightness-0 invert"
                 onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
               <div>
                 <div className="font-black text-white text-sm">Maternité Rahama</div>

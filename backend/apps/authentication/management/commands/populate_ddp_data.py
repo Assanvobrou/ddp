@@ -63,13 +63,13 @@ class Command(BaseCommand):
         if not User.objects.filter(email="admin@ddp.ci").exists():
             admin = User.objects.create_superuser(
                 email="admin@ddp.ci",
-                password="Admin@DDP2026!",
+                password="admin@DDP2026!",
                 nom="Admin",
                 prenom="Super",
             )
             admin.mot_de_passe_provisoire = True
             admin.save()
-            self.stdout.write("\n✅ Super admin créé : admin@ddp.ci / Admin@DDP2026!")
+            self.stdout.write("\n✅ Super admin créé : admin@ddp.ci / admin@ddp2026!")
         else:
             self.stdout.write("\n⏭  Super admin existe déjà.")
 
