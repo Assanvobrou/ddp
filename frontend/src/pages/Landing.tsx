@@ -1,21 +1,20 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Baby, Heart, Stethoscope, Syringe, Scan,
-  FlaskConical, ShieldCheck, Ambulance,
-  Phone, Mail, MapPin, Clock, LogIn,
-  Users, CheckCircle, ChevronRight
+  Baby, Heart, Syringe, Scan, FlaskConical,
+  ShieldCheck, Ambulance, Phone, Mail,
+  MapPin, Clock, LogIn, Users, CheckCircle, ChevronRight
 } from 'lucide-react'
 
 const SERVICES = [
-  { icon: <Baby size={24} strokeWidth={1.5} />, nom: 'Suivi de grossesse', desc: 'Consultations prénatales, échographies, surveillance de la grossesse mois par mois.' },
-  { icon: <Heart size={24} strokeWidth={1.5} />, nom: 'Accouchement', desc: 'Accouchement assisté par des sages-femmes qualifiées, césarienne si nécessaire.' },
-  { icon: <Stethoscope size={24} strokeWidth={1.5} />, nom: 'Consultations gynécologiques', desc: 'Examens gynécologiques, dépistage, traitement des pathologies féminines.' },
-  { icon: <Scan size={24} strokeWidth={1.5} />, nom: 'Échographie obstétricale', desc: 'Échographies de datation, morphologiques et de suivi tout au long de la grossesse.' },
-  { icon: <Syringe size={24} strokeWidth={1.5} />, nom: 'Vaccination mère & enfant', desc: 'Programme de vaccination complet pour les mamans et les nouveau-nés.' },
-  { icon: <FlaskConical size={24} strokeWidth={1.5} />, nom: 'Analyses & Laboratoire', desc: 'Bilans sanguins, sérologies, analyses prénatales obligatoires.' },
-  { icon: <ShieldCheck size={24} strokeWidth={1.5} />, nom: 'Planification familiale', desc: 'Conseil et accompagnement en contraception et planification des naissances.' },
-  { icon: <Ambulance size={24} strokeWidth={1.5} />, nom: 'Urgences obstétricales', desc: 'Prise en charge des urgences maternelles et néonatales 24h/24.' },
+  { icon: <Baby size={22} strokeWidth={1.5} />, nom: 'Suivi de grossesse', desc: 'Consultations prénatales, échographies, surveillance de la grossesse mois par mois.' },
+  { icon: <Heart size={22} strokeWidth={1.5} />, nom: 'Accouchement', desc: 'Accouchement assisté par des sages-femmes qualifiées, césarienne si nécessaire.' },
+  { icon: <ShieldCheck size={22} strokeWidth={1.5} />, nom: 'Consultations gynécologiques', desc: 'Examens gynécologiques, dépistage, traitement des pathologies féminines.' },
+  { icon: <Scan size={22} strokeWidth={1.5} />, nom: 'Échographie obstétricale', desc: 'Échographies de datation, morphologiques et de suivi tout au long de la grossesse.' },
+  { icon: <Syringe size={22} strokeWidth={1.5} />, nom: 'Vaccination mère & enfant', desc: 'Programme de vaccination complet pour les mamans et les nouveau-nés.' },
+  { icon: <FlaskConical size={22} strokeWidth={1.5} />, nom: 'Analyses & Laboratoire', desc: 'Bilans sanguins, sérologies, analyses prénatales obligatoires.' },
+  { icon: <CheckCircle size={22} strokeWidth={1.5} />, nom: 'Planification familiale', desc: 'Conseil et accompagnement en contraception et planification des naissances.' },
+  { icon: <Ambulance size={22} strokeWidth={1.5} />, nom: 'Urgences obstétricales', desc: 'Prise en charge des urgences maternelles et néonatales 24h/24.' },
 ]
 
 const ATOUTS = [
@@ -31,45 +30,61 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}>
 
-      {/* NAV */}
+      {/* ── NAV ── */}
       <header className="fixed top-0 w-full bg-white/95 backdrop-blur border-b border-gray-100 z-50">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+          {/* Logo + nom */}
           <div className="flex items-center gap-2.5">
-            <img src="/logo.jpeg" alt="Maternité Rahama" className="h-10 w-auto"
+            <img src="/logo_2.png" alt="Maternité Rahama" className="h-9 w-9 object-contain rounded-lg"
               onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
             <div>
               <div className="font-black text-gray-900 text-[15px] leading-tight">Maternité Rahama</div>
-              <div className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">La vie commence ici</div>
+              <div className="text-[9px] text-primary-600 font-bold uppercase tracking-wider">La vie commence ici</div>
             </div>
           </div>
-          <nav className="flex items-center gap-4 md:gap-6">
+          {/* Nav links */}
+          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-500">
+            <a href="#" className="hover:text-gray-900 transition-colors">Accueil</a>
+            <a href="#" className="hover:text-gray-900 transition-colors">À propos</a>
+            <a href="#services" className="hover:text-gray-900 transition-colors">Services</a>
             <button onClick={() => contactRef.current?.scrollIntoView({ behavior: 'smooth' })}
-              className="hidden md:block text-sm text-gray-500 font-medium hover:text-gray-900 transition-colors">
-              Contact
-            </button>
-            <Link to="/connexion"
-              className="flex items-center gap-1.5 bg-primary-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-700 transition-colors">
-              <LogIn size={14} strokeWidth={1.75} />
-              <span className="hidden sm:inline">Espace personnel</span>
-              <span className="sm:hidden">Connexion</span>
-            </Link>
+              className="hover:text-gray-900 transition-colors">Contact</button>
           </nav>
+          <Link to="/connexion"
+            className="flex items-center gap-1.5 bg-primary-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-primary-700 transition-colors">
+            <LogIn size={14} strokeWidth={1.75} />
+            <span className="hidden sm:inline">Espace personnel</span>
+          </Link>
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="pt-28 pb-16 md:pb-20 px-4 md:px-6" style={{ background: 'linear-gradient(135deg, #FDF2F8 0%, #FFFFFF 60%, #FDF2F8 100%)' }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 bg-white border border-primary-200 text-primary-700 text-xs font-bold px-3 py-1.5 rounded-full mb-6 shadow-sm">
-              <Baby size={12} strokeWidth={2.5} className="text-primary-600" />
+      {/* ── HERO ── */}
+      <section className="pt-16 min-h-screen flex items-center" style={{ background: 'linear-gradient(135deg, #FDF2F8 0%, #FFFFFF 50%, #FDF2F8 100%)' }}>
+        <div className="max-w-6xl mx-auto px-4 md:px-8 w-full grid md:grid-cols-2 gap-10 items-center py-16">
+          {/* Illustration gauche */}
+          <div className="flex justify-center order-2 md:order-1">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-full bg-primary-100/60" style={{ transform: 'scale(1.1)' }} />
+              <img src="/logo_2.png" alt="Maternité Rahama"
+                className="relative w-64 h-64 md:w-80 md:h-80 object-contain"
+                style={{ filter: 'drop-shadow(0 8px 24px rgba(192,98,142,0.25))' }}
+                onError={(e) => {
+                  const el = e.target as HTMLImageElement
+                  el.style.display = 'none'
+                }} />
+            </div>
+          </div>
+          {/* Texte droite */}
+          <div className="order-1 md:order-2">
+            <div className="inline-flex items-center gap-2 bg-white border border-primary-200 text-primary-700 text-xs font-bold px-3 py-1.5 rounded-full mb-5 shadow-sm">
+              <MapPin size={11} strokeWidth={2} />
               Maternité — Gagnoa, Côte d'Ivoire
             </div>
-            <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight mb-5">
+            <h1 className="text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight mb-5">
               La vie commence<br />
               <span className="text-primary-600">entre les meilleures mains.</span>
             </h1>
-            <p className="text-base md:text-xl text-gray-500 leading-relaxed mb-8 md:mb-10 max-w-xl">
+            <p className="text-base text-gray-500 leading-relaxed mb-8 max-w-lg">
               La Maternité Rahama vous accompagne de la grossesse à l'accouchement, avec une équipe de sages-femmes dévouées dans un cadre sûr et chaleureux.
             </p>
             <div className="flex flex-wrap gap-3">
@@ -87,12 +102,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ATOUTS */}
-      <section className="py-10 md:py-12 border-y border-gray-100 bg-white">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      {/* ── ATOUTS ── */}
+      <section className="py-14 border-y border-gray-100 bg-white">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
           {ATOUTS.map((a, i) => (
-            <div key={i} className="flex flex-col gap-2">
-              <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center mb-1">
+            <div key={i} className="flex flex-col gap-2 text-center">
+              <div className="w-11 h-11 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-1">
                 {a.icon}
               </div>
               <div className="font-bold text-sm text-gray-900">{a.titre}</div>
@@ -102,17 +117,54 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* SERVICES */}
-      <section className="py-16 md:py-20 px-4 md:px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-10 md:mb-12">
-            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">Nos services</h2>
-            <p className="text-gray-500 max-w-lg">Un accompagnement complet pour la maman et le bébé, de la conception aux premiers jours.</p>
+      {/* ── ENGAGEMENT ── */}
+      <section className="py-16 px-4 md:px-8 bg-gray-50">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          {/* Photo façade */}
+          <div className="rounded-2xl overflow-hidden shadow-lg bg-primary-100 aspect-video flex items-center justify-center">
+            <img src="/logo_2.png" alt="Maternité Rahama"
+              className="w-48 h-48 object-contain opacity-30"
+              onError={(e) => { (e.target as HTMLImageElement).style.opacity='0' }} />
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div>
+            <div className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-3">Notre engagement</div>
+            <h2 className="text-3xl font-black text-gray-900 mb-4">
+              Votre bien-être,<br />notre priorité <Heart size={24} className="inline text-primary-600" strokeWidth={1.75} />
+            </h2>
+            <p className="text-gray-500 leading-relaxed mb-6">
+              Nous mettons tout en œuvre pour offrir un accompagnement humain, personnalisé et sécurisé à chaque étape de votre maternité.
+            </p>
+            <div className="space-y-3">
+              {[
+                'Suivi personnalisé de la grossesse',
+                'Sages-femmes disponibles 24h/24',
+                'Prise en charge assurance simplifiée',
+                'Environnement chaleureux et sécurisé',
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3 text-sm text-gray-700">
+                  <div className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle size={12} className="text-primary-600" strokeWidth={2} />
+                  </div>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SERVICES ── */}
+      <section id="services" className="py-16 md:py-20 px-4 md:px-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-3">Nos services</div>
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Un accompagnement complet</h2>
+            <p className="text-gray-500 max-w-lg mx-auto">Pour la maman et le bébé, de la conception aux premiers jours de vie.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {SERVICES.map((s, i) => (
-              <div key={i} className="group flex gap-4 p-4 md:p-5 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all bg-white cursor-default">
-                <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0 group-hover:bg-primary-600 group-hover:text-white transition-colors">
+              <div key={i} className="group flex flex-col gap-3 p-5 rounded-2xl border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all bg-white">
+                <div className="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center group-hover:bg-primary-600 group-hover:text-white transition-colors">
                   {s.icon}
                 </div>
                 <div>
@@ -125,10 +177,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ASSURANCES */}
-      <section className="py-14 md:py-16 px-4 md:px-6 bg-gray-50">
+      {/* ── ASSURANCES ── */}
+      <section className="py-14 px-4 md:px-8 bg-primary-50">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-xl md:text-2xl font-black text-gray-900 mb-3">Assurances partenaires</h2>
+          <h2 className="text-xl font-black text-gray-900 mb-2">Assurances partenaires</h2>
           <p className="text-gray-500 mb-8 text-sm">Nous acceptons les principaux organismes d'assurance maladie en Côte d'Ivoire.</p>
           <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             {['CNPS', 'MUGEF-CI', 'NSIA', 'SUNU', 'AXA', 'ALLIANZ', 'ATLANTIQUE', 'SOHAM', 'COLINA', 'PRIMA'].map(a => (
@@ -140,27 +192,12 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 md:py-20 px-4 md:px-6 bg-primary-700">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-5">
-            <Baby size={28} strokeWidth={1.5} className="text-white" />
-          </div>
-          <h2 className="text-2xl md:text-3xl font-black text-white mb-4">Bienvenue à la Maternité Rahama</h2>
-          <p className="text-white/80 mb-8 text-sm md:text-base">Chaque naissance est un moment unique. Notre équipe vous accompagne avec bienveillance et professionnalisme.</p>
-          <Link to="/connexion"
-            className="inline-flex items-center gap-2 bg-white text-primary-700 px-8 py-3.5 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors shadow-lg">
-            <LogIn size={16} strokeWidth={1.75} />
-            Espace personnel
-          </Link>
-        </div>
-      </section>
-
-      {/* CONTACT */}
-      <section ref={contactRef} className="py-16 md:py-20 px-4 md:px-6 bg-white">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 md:gap-12 items-start">
+      {/* ── CONTACT ── */}
+      <section ref={contactRef} className="py-16 md:py-20 px-4 md:px-8 bg-white">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-start">
           <div>
-            <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-4">Nous trouver</h2>
+            <div className="text-xs font-bold text-primary-600 uppercase tracking-widest mb-3">Contact</div>
+            <h2 className="text-3xl font-black text-gray-900 mb-4">Nous trouver</h2>
             <p className="text-gray-500 mb-8 leading-relaxed">Notre équipe est disponible pour répondre à toutes vos questions et vous accueillir.</p>
             <div className="space-y-4">
               {[
@@ -170,9 +207,7 @@ export default function Landing() {
                 { icon: <Clock size={18} strokeWidth={1.75} />, label: 'Urgences', val: '24h/24 · 7j/7' },
               ].map((c, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    {c.icon}
-                  </div>
+                  <div className="w-9 h-9 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0 mt-0.5">{c.icon}</div>
                   <div>
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">{c.label}</div>
                     <div className="text-sm font-semibold text-gray-900 mt-0.5">{c.val}</div>
@@ -181,7 +216,6 @@ export default function Landing() {
               ))}
             </div>
           </div>
-
           <div className="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-100">
             <h3 className="font-black text-gray-900 mb-1">Prendre rendez-vous</h3>
             <p className="text-sm text-gray-500 mb-6">Remplissez ce formulaire, nous vous rappelons sous 24h.</p>
@@ -215,25 +249,29 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="py-8 px-4 md:px-6 bg-gray-900">
+      {/* ── FOOTER ── */}
+      <footer className="py-8 px-4 md:px-8 bg-gray-900">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div className="flex items-center gap-2.5">
-              <img src="/logo.jpeg" alt="Logo" className="h-8 w-auto brightness-0 invert"
+              <img src="/logo_2.png" alt="Logo" className="h-9 w-9 object-contain rounded-lg brightness-0 invert"
                 onError={(e) => { (e.target as HTMLImageElement).style.display='none' }} />
               <div>
                 <div className="font-black text-white text-sm">Maternité Rahama</div>
                 <div className="text-xs text-gray-500">La vie commence ici</div>
               </div>
             </div>
-            <div className="text-xs text-gray-500 leading-relaxed md:text-right">
+            <div className="flex flex-col md:text-right gap-1 text-xs text-gray-500">
               <div>Gagnoa, Sokoura 2è carrefour, mosquée croisée</div>
-              <div className="mt-0.5">Tél : 07 07 78 52 74 · maaboritedinma@gmail.com</div>
+              <div>Tél : 07 07 78 52 74 · maaboritedinma@gmail.com</div>
             </div>
           </div>
-          <div className="mt-6 pt-4 border-t border-gray-800 text-center text-xs text-gray-600">
-            © 2026 Maternité Rahama · Gagnoa, Côte d'Ivoire — Tous droits réservés
+          <div className="pt-4 border-t border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <p className="text-xs text-gray-600">© 2026 Maternité Rahama · Gagnoa, Côte d'Ivoire — Tous droits réservés</p>
+            <Link to="/connexion" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-white transition-colors">
+              <LogIn size={12} strokeWidth={1.75} />
+              Espace personnel
+            </Link>
           </div>
         </div>
       </footer>
