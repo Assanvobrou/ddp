@@ -25,8 +25,8 @@ const CAISSE_ITEMS_RESPONSABLE = [
   { path: '/caisse/paiements',         label: 'Paiements',          icon: <ClipboardList size={16} strokeWidth={1.75} /> },
   { path: '/caisse/paiements-valides', label: 'Paiements validés',  icon: <CheckSquare size={16} strokeWidth={1.75} /> },
   { path: '/caisse/cloture',           label: 'Clôture de caisse',  icon: <FileText size={16} strokeWidth={1.75} /> },
-  { path: '/caisse/versements',        label: 'Versements',         icon: <ArrowLeftRight size={16} strokeWidth={1.75} />, permission: 'caisse.voir_dashboard_recettes' },
-  { path: '/caisse/rapports',          label: 'Rapports',           icon: <TrendingUp size={16} strokeWidth={1.75} />,    permission: 'caisse.voir_dashboard_recettes' },
+  { path: '/caisse/versements',        label: 'Versements',         icon: <ArrowLeftRight size={16} strokeWidth={1.75} />, permission: 'caisse.voir_rapports' },
+  { path: '/caisse/rapports',          label: 'Rapports',           icon: <TrendingUp size={16} strokeWidth={1.75} />,    permission: 'caisse.voir_rapports' },
 ]
 
 const CONFIG_ITEMS = [
@@ -61,7 +61,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const activeModule = location.pathname.split('/')[1] || null
 
   const getCaisseItems = () =>
-    hasPermission('caisse.voir_dashboard_recettes')
+    hasPermission('caisse.voir_rapports')
       ? CAISSE_ITEMS_RESPONSABLE
       : CAISSE_ITEMS_CAISSIERE
 
@@ -73,7 +73,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   const subItems = activeModule ? MODULE_SUBITEMS[activeModule] || [] : []
   const showCaisseStatus =
-    (hasPermission('caisse.gerer_session_caisse') || hasPermission('caisse.voir_dashboard_recettes'))
+    (hasPermission('caisse.ouvrir_fermer_session') || hasPermission('caisse.voir_rapports'))
     && activeModule
 
   const handleLogout = async () => {
@@ -88,7 +88,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       {/* Logo */}
       <div className="px-4 py-3.5 border-b border-surface-100">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.jpeg" alt="Logo" className="w-8 h-8 rounded-lg object-contain"
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg object-contain"
             onError={(e: any) => { e.target.style.display='none'; e.target.nextElementSibling?.classList.remove('hidden') }} />
           <div className="w-8 h-8 rounded-lg bg-primary-600 items-center justify-center text-white flex-shrink-0 hidden">
             <Stethoscope size={15} strokeWidth={2} />

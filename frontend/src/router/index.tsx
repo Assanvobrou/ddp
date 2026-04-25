@@ -77,8 +77,8 @@ export default function AppRouter() {
         <Route path="/caisse/cloture" element={<ProtectedRoute><ClotureCaisse /></ProtectedRoute>} />
 
         {/* Caisse — Responsable uniquement */}
-        <Route path="/caisse/versements" element={<ProtectedRoute permission="caisse.voir_dashboard_recettes"><Versements /></ProtectedRoute>} />
-        <Route path="/caisse/rapports" element={<ProtectedRoute permission="caisse.voir_dashboard_recettes"><Rapports /></ProtectedRoute>} />
+        <Route path="/caisse/versements" element={<ProtectedRoute permission="caisse.voir_rapports"><Versements /></ProtectedRoute>} />
+        <Route path="/caisse/rapports" element={<ProtectedRoute permission="caisse.voir_rapports"><Rapports /></ProtectedRoute>} />
 
         {/* Configuration */}
         <Route path="/configuration/services" element={<ProtectedRoute><Services /></ProtectedRoute>} />
