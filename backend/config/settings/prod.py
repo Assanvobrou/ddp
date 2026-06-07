@@ -1,23 +1,57 @@
 from .base import *
 import os
+import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 DEBUG = False
-SECRET_KEY = os.environ.get("SECRET_KEY", "change-me-in-production")
+SECRET_KEY = (
+    os.environ.get("SECRET_KEY")
+    or os.environ.get("DJANGO_SECRET_KEY")
+    or "change-me-in-production"
+)
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
+    if host.strip()
+]
+if os.environ.get("RENDER_EXTERNAL_HOSTNAME"):
+    ALLOWED_HOSTS.append(os.environ["RENDER_EXTERNAL_HOSTNAME"])
+
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 # ── Base de données PostgreSQL Render ──
-DATABASES = {
-    "default": {
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.parse(
+            os.environ["DATABASE_URL"],
+            conn_max_age=600,
+            ssl_require=os.environ.get("DB_SSL_REQUIRE", "").lower()
+            in {"1", "true", "yes"},
+        )
+    }
+else:
+    required_db_vars = ["PGDATABASE", "PGUSER", "PGPASSWORD", "PGHOST"]
+    missing_db_vars = [name for name in required_db_vars if not os.environ.get(name)]
+    if missing_db_vars:
+        raise ImproperlyConfigured(
+            "Production database is not configured. Set DATABASE_URL or these "
+            f"PostgreSQL variables: {', '.join(required_db_vars)}."
+        )
+
+    DATABASES = {"default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("PGDATABASE"),
         "USER": os.environ.get("PGUSER"),
         "PASSWORD": os.environ.get("PGPASSWORD"),
         "HOST": os.environ.get("PGHOST"),
         "PORT": os.environ.get("PGPORT", "5432"),
-    }
-}
+        "CONN_MAX_AGE": 600,
+    }}
 
 # ── Sécurité HTTPS ──
 SECURE_SSL_REDIRECT = True
