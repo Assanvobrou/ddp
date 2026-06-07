@@ -102,7 +102,6 @@ class Command(BaseCommand):
                         "service": service,
                         "prix": p_data["prix"],
                         "prise_en_charge_assurance": p_data["assurance"],
-                        "taux_assurance": p_data["taux"],
                         "ordre": ordre,
                     }
                 )
