@@ -23,6 +23,9 @@ CORS_ALLOWED_ORIGINS = [
     for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
     if origin.strip()
 ]
+for origin in ["https://ddp-frontend.onrender.com"]:
+    if origin not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(origin)
 
 # ── Base de données PostgreSQL Render ──
 if os.environ.get("DATABASE_URL"):

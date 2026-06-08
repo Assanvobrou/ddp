@@ -17,7 +17,7 @@ services:
       - key: ALLOWED_HOSTS
         sync: false
       - key: CORS_ALLOWED_ORIGINS
-        sync: false
+        value: https://ddp-frontend.onrender.com
 
   - type: web
     name: ddp-frontend
@@ -27,7 +27,7 @@ services:
     staticPublishPath: "./dist"
     envVars:
       - key: VITE_API_URL
-        sync: false
+        value: https://ddp-backend.onrender.com/api/v1
     routes:
       - type: rewrite
         source: /*
